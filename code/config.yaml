@@ -1,0 +1,19 @@
+data:
+  out_dir: ../data
+parser:
+  field_separator: ;;
+  msg_marker: ' MESSAGE: '
+  sentinel_substrings:
+  - '-92233'
+  book_types: [A, U, D, E]
+  trade_types: [E, P]
+  imbalance_types: [I]
+  halt_types: [H]
+state:
+  p_ref: session_open_mid
+  spread: relative
+  sampling: event
+stoikov:
+  n_imbalance_bins: 10
+  n_spread_states: 3
+  power_iters: 6

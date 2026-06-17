@@ -1,0 +1,65 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage{parskip}
+
+\begin{document}
+
+\noindent
+To the Editor,\\[1em]
+
+We submit for your consideration ``From Microprice to Microdiffusion: Heavy-Tailed
+Price Diffusion in Limit Order Books.''
+
+\bigskip
+\noindent\textbf{What the paper does.}
+Standard microstructure models condition the price \emph{drift} on order-book state,
+most directly through the microprice. We ask the complementary question: does the
+order-book state also condition the \emph{second moment} of price changes? We show that
+it does. Using tick-by-tick data from the Qatar Stock Exchange (36 instruments, 216
+trading days), we estimate a conditional diffusion surface $a_{xx}(I,S)$ indexed by
+order-book imbalance $I$ and relative spread $S$, and study whether and how it
+transfers out of sample.
+
+\bigskip
+\noindent\textbf{Main findings.}
+\begin{enumerate}
+
+\item \emph{The surface is stable and portable.} Trained on one set of
+  days and evaluated on disjoint days, the surface transfers with a Spearman rank
+  correlation of $0.48$ (instrument-clustered 95\% interval $[0.40,\,0.56]$). The
+  spread axis carries most of the transferable level; the within-spread imbalance
+  shape is a real contemporaneous effect but does not reliably transfer day to day.
+  The surface also transfers across volatility regimes: cross-regime rank correlations
+  of $0.849$ and $0.845$ exceed the adjacent-block baseline of $0.785$.
+
+\item \emph{A Generalized Hyperbolic innovation is needed.} The Gaussian collapses in
+  the far tail by orders of magnitude; the maximum-likelihood Student-$t$ is pulled to
+  $\hat{\nu}=1.56$ (no finite variance). The Generalized Hyperbolic matches the
+  empirical tail closely and improves an intraday VaR backtest materially over the
+  Gaussian: at $\alpha=0.01$ the median violation rate falls from $0.0275$ to
+  $0.0133$ across 36 instruments.
+
+\item \emph{The model is competitive with time-series benchmarks without using return
+  history.} Against jointly estimated GARCH-$t$, the model is a statistical tie rather
+  than a clear winner. Its value is different: it gives an observable and transferable
+  book-state surface that can be read before the next move occurs.
+
+\end{enumerate}
+
+\bigskip
+\noindent\textbf{Fit for this journal.}
+The paper is written for readers interested in market microstructure, financial
+econometrics, and short-horizon risk measurement. It introduces a new estimand, the
+conditional diffusion surface, shows that it transfers across days, instruments, and
+volatility regimes, and uses it to build a heavy-tailed predictive distribution for
+short-horizon price risk. We are submitting it to [Journal name] because the journal
+regularly publishes empirical work on forecasting, risk measurement, and financial
+market dynamics.
+
+\bigskip
+\noindent Geoffrey Ducournau, Yibo Wang, Jinliang Li\\
+\noindent jll@tsinghua.edu.cn
+
+\end{document}

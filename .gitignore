@@ -1,0 +1,44 @@
+# ── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+
+# ── LaTeX build artefacts ─────────────────────────────────────────────────────
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+
+# ── Environment / secrets ────────────────────────────────────────────────────
+.env
+.env.local
+
+# ── Data ─────────────────────────────────────────────────────────────────────
+# Processed parquet files (136 MB, 4764 files) — ignored by default.
+# For a private referee repo where redistribution is confirmed, add:
+#   !data/clean/
+# to a local .gitignore override, or remove this line and commit the folder.
+data/clean/
+
+# Raw exchange data — never commit
+*.log
+*.mitch
+data/raw/
+
+# Large intermediate outputs that may land in data/ during replication
+data/drift_diffusion/
+data/state/
+data/tables/
+data/figures/
+
+# ── OS noise ─────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
