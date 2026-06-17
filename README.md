@@ -18,6 +18,13 @@ microdiffusion/
     04_benchmarks/       §5/App  GARCH benchmarks
   data/
     clean/               processed QSE L1 parquet files (see data/README.md)
+  paper/
+    main.tex             current unblinded manuscript source
+    main.pdf             current unblinded manuscript PDF
+    figures/             manuscript figures
+    sections/            included descriptive-statistics tables
+  journal/
+    JEF/                 Journal of Empirical Finance submission copy
   environment.yml
 ```
 
@@ -100,8 +107,19 @@ python code/04_benchmarks/generate_paper1_figures.py
 ```
 
 All scripts can be run from the repo root or from inside `code/`. Figures are written to
-`paper/figures/` (if the `paper/` folder exists locally) or to a local `output/figures/`
-subfolder within each section.
+`paper/figures/` when they are manuscript figures; diagnostic-only outputs may be written
+to a local `output/` subfolder within each section.
+
+## Paper and submission files
+
+- `paper/main.tex` and `paper/main.pdf`: current unblinded paper.
+- `paper/figures/`: complete 20-figure set used by the manuscript.
+- `journal/JEF/manuscript_anonymized.pdf`: double-anonymized manuscript for review.
+- `journal/JEF/title_page.pdf`: separate title page with authors, declarations, funding,
+  code availability, and corresponding-author details.
+- `journal/JEF/cover_letter_JEF.pdf`: JEF cover letter.
+- `journal/JEF/highlights_JEF.txt`: Elsevier highlights.
+- `journal/JEF/paper1_JEF_submission_package.zip`: complete JEF upload/archive package.
 
 ## Data
 

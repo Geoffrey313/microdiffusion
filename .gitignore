@@ -39,9 +39,6 @@ data/state/
 data/tables/
 data/figures/
 
-# ── Paper source (lives in swarm-trader / Overleaf) ──────────────────────────
-paper/
-
 # ── OS noise ─────────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
