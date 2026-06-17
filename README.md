@@ -16,11 +16,6 @@ microdiffusion/
     02_innovation/       §4  GH heavy-tailed innovation
     03_robustness/       §5  robustness and validation
     04_benchmarks/       §5/App  GARCH benchmarks
-  paper/
-    main.tex
-    references.bib
-    cover_letter_revision.tex
-    figures/             committed PNG outputs
   data/
     clean/               processed QSE L1 parquet files (see data/README.md)
   environment.yml
@@ -33,52 +28,80 @@ conda env create -f environment.yml
 conda activate market-maker
 ```
 
-## Run order
+## Run full pipeline
 
-Scripts are run from their own subfolder. Each reads `config.yaml` and `plot_style.py`
-from the `code/` root via `CODE = Path(__file__).resolve().parents[1]`.
+To reproduce all results in order:
 
-### §3 — Surface estimation (`code/01_surface/`)
+```bash
+cd code
 
-| Script | Output | Paper |
-|--------|--------|-------|
-| `conditional_sde_scale_recovery.py` | `fig_axx_surface.png`, `fig_drift_surface.png` | §3 |
-| `conditional_sde_cellcounts.py` | `fig_axx_heatmap_counts.png` | §3 |
-| `conditional_sde_identifiability.py` | identifiability diagnostics (stdout) | §3 App |
-| `conditional_sde_prototype.py` | prototype surface (exploratory) | — |
+python 01_surface/conditional_sde_scale_recovery.py
+python 01_surface/conditional_sde_cellcounts.py
 
-### §4 — GH innovation (`code/02_innovation/`)
+python 02_innovation/conditional_sde_heavytail.py
+python 02_innovation/conditional_sde_gh_oos.py
+python 02_innovation/conditional_sde_gh_loio.py
+python 02_innovation/conditional_sde_price_band.py
 
-| Script | Output | Paper |
-|--------|--------|-------|
-| `conditional_sde_heavytail.py` | tail exceedance table (stdout) | §4 |
-| `conditional_sde_gh_oos.py` | OOS log-likelihood gain (stdout) | §4 |
-| `conditional_sde_gh_loio.py` | `fig_gh_loio.png` | §4 |
-| `conditional_sde_ghsim.py` | GH simulation diagnostics | App |
-| `conditional_sde_price_band.py` | `fig_price_band.png`, `fig_model_vs_realized.png` | §4 |
+python 03_robustness/conditional_sde_var_backtest.py
+python 03_robustness/conditional_sde_regime_transfer.py
+python 03_robustness/conditional_sde_thinname_exclusion.py
+python 03_robustness/conditional_sde_tick_control.py
+python 03_robustness/conditional_sde_zeromove.py
+python 03_robustness/conditional_sde_transfer_coldstart.py
 
-### §5 — Robustness (`code/03_robustness/`)
+python 04_benchmarks/conditional_sde_garch_compare.py
+python 04_benchmarks/conditional_sde_garch_grid.py
+python 04_benchmarks/generate_paper1_figures.py
+```
 
-| Script | Output | Paper |
-|--------|--------|-------|
-| `conditional_sde_var_backtest.py` | `fig_var_backtest.png` | §5 |
-| `conditional_sde_regime_transfer.py` | `fig_regime_transfer.png` | §5 |
-| `conditional_sde_thinname_exclusion.py` | thin-name robustness table (stdout) | §5 |
-| `conditional_sde_tick_control.py` | `fig_tick_control.png` | §5 |
-| `conditional_sde_zeromove.py` | `fig_zeromove.png` | §5 |
-| `conditional_sde_transfer_coldstart.py` | `fig_transfer_coldstart.png` | §5 |
-| `conditional_sde_clustering.py` | violation clustering diagnostics (stdout) | diagnostic — not in manuscript |
+## Run individual scripts
 
-### §5/App — GARCH benchmarks (`code/04_benchmarks/`)
+### §3 — Surface estimation
 
-| Script | Output | Paper |
-|--------|--------|-------|
-| `conditional_sde_garch_compare.py` | `fig_garch_compare.png` | §5 |
-| `conditional_sde_garch_grid.py` | `fig_garch_calibration.png` | App |
-| `conditional_sde_garch_fixedclock.py` | fixed-clock GARCH diagnostics | App |
-| `conditional_sde_benchmarks.py` | benchmark comparison table | App |
-| `generate_garch_figure.py` | GARCH figure entry point | App |
-| `generate_paper1_figures.py` | gap/scale figures | §3 |
+```bash
+python code/01_surface/conditional_sde_scale_recovery.py   # fig_axx_surface.png, fig_drift_surface.png
+python code/01_surface/conditional_sde_cellcounts.py       # fig_axx_heatmap_counts.png
+python code/01_surface/conditional_sde_identifiability.py  # identifiability diagnostics (stdout)
+```
+
+### §4 — GH innovation
+
+```bash
+python code/02_innovation/conditional_sde_heavytail.py     # tail exceedance table (stdout)
+python code/02_innovation/conditional_sde_gh_oos.py        # OOS log-likelihood gain (stdout)
+python code/02_innovation/conditional_sde_gh_loio.py       # fig_gh_loio.png
+python code/02_innovation/conditional_sde_price_band.py    # fig_price_band.png, fig_model_vs_realized.png
+python code/02_innovation/conditional_sde_ghsim.py         # GH simulation diagnostics (appendix)
+```
+
+### §5 — Robustness
+
+```bash
+python code/03_robustness/conditional_sde_var_backtest.py       # fig_var_backtest.png
+python code/03_robustness/conditional_sde_regime_transfer.py    # fig_regime_transfer.png
+python code/03_robustness/conditional_sde_thinname_exclusion.py # thin-name table (stdout)
+python code/03_robustness/conditional_sde_tick_control.py       # fig_tick_control.png
+python code/03_robustness/conditional_sde_zeromove.py           # fig_zeromove.png
+python code/03_robustness/conditional_sde_transfer_coldstart.py # fig_transfer_coldstart.png
+# diagnostic only — not in manuscript:
+python code/03_robustness/conditional_sde_clustering.py         # violation clustering (stdout)
+```
+
+### §5/App — GARCH benchmarks
+
+```bash
+python code/04_benchmarks/conditional_sde_garch_compare.py      # fig_garch_compare.png
+python code/04_benchmarks/conditional_sde_garch_grid.py         # fig_garch_calibration.png
+python code/04_benchmarks/conditional_sde_garch_fixedclock.py   # fixed-clock diagnostics
+python code/04_benchmarks/conditional_sde_benchmarks.py         # benchmark table
+python code/04_benchmarks/generate_garch_figure.py
+python code/04_benchmarks/generate_paper1_figures.py
+```
+
+All scripts can be run from the repo root or from inside `code/`. Figures are written to
+`paper/figures/` (if the `paper/` folder exists locally) or to a local `output/figures/`
+subfolder within each section.
 
 ## Data
 
