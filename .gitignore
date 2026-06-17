@@ -39,6 +39,10 @@ data/state/
 data/tables/
 data/figures/
 
+# ── Local manuscript / journal submission copies ─────────────────────────────
+paper/
+journal/
+
 # ── OS noise ─────────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
