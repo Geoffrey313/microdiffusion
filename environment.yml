@@ -119,4 +119,3 @@ dependencies:
       - websocket-client==1.9.0
       - websockets==12.0
       - yarl==1.22.0
-prefix: /home/dimtech/.conda/envs/market-maker
