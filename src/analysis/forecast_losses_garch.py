@@ -31,13 +31,13 @@ from scipy import optimize, stats
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from common.paths import load_config, CLEAN_DIR, DATA_EXPORT, PANEL, RESULTS_DIR, DIAG_DIR, FIG_DIR, ensure
+from common.paths import DATA_EXPORT, PANEL, RESULTS_DIR
+from common.grid import N_I, M_S
 
 EXPORT = DATA_EXPORT
 OUT = RESULTS_DIR
 OUT.mkdir(exist_ok=True)
 
-N_I, M_S = 10, 3
 MIN_CELL = 50
 FIT_CAP = 12000
 WINSOR = 0.995

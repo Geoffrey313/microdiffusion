@@ -14,6 +14,7 @@ Anchors
     CLEAN_DIR    data/clean/           processed per-session L1 parquet
     DATA_EXPORT  data/data_export/     flat event panel and precomputed files
     PANEL        the event_panel.parquet used by the forecast analyses
+    CRYPTO_DIR   external 1-second crypto feed (Appendix E, git-ignored)
     RESULTS_DIR  results/              article tables written by the analyses
     DIAG_DIR     results/diagnostics/  diagnostic-only tables and figures
     FIG_DIR      paper/figures/        manuscript figures (local paper build)
@@ -33,6 +34,11 @@ DATA_DIR = Path(os.environ.get("MICRODIFFUSION_DATA_DIR", REPO_ROOT / "data"))
 CLEAN_DIR = DATA_DIR / "clean"
 DATA_EXPORT = DATA_DIR / "data_export"
 PANEL = DATA_EXPORT / "event_panel.parquet"
+
+# External one-second cryptocurrency feed for the Appendix E robustness check.
+# It is not redistributed with the package; place the {BTC,ETH,ADA}_1sec.csv
+# files under data/crypto or point MICRODIFFUSION_CRYPTO_DIR at them.
+CRYPTO_DIR = Path(os.environ.get("MICRODIFFUSION_CRYPTO_DIR", DATA_DIR / "crypto"))
 
 RESULTS_DIR = REPO_ROOT / "results"
 DIAG_DIR = RESULTS_DIR / "diagnostics"

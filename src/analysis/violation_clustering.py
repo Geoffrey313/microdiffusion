@@ -27,18 +27,17 @@ from __future__ import annotations
 from pathlib import Path
 import numpy as np
 import pandas as pd
-import yaml
 from scipy import stats
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from common.paths import load_config, CLEAN_DIR, DATA_EXPORT, PANEL, RESULTS_DIR, DIAG_DIR, FIG_DIR, ensure
-from common.plot_style import finish, setup_mpl, despine, INK, ACCENT, ACCENT_DARK, WARN, MUTED, POS
+from common.paths import load_config, CLEAN_DIR, FIG_DIR
+from common.grid import N_I, M_S, cell_ids
+from common.plot_style import finish, setup_mpl, despine, INK, ACCENT, ACCENT_DARK, MUTED
 
 OUTF = FIG_DIR
 OUTF.mkdir(parents=True, exist_ok=True)
 
-N_I, M_S = 10, 3
 TRAIN_FRAC = 0.60
 MIN_CELL = 50
 ALPHAS = [0.01, 0.05]
@@ -71,12 +70,6 @@ def session_increments(path):
     df = pd.DataFrame({"dx": dx, "I": I[:-1], "S": S[:-1]}).replace(
         [np.inf, -np.inf], np.nan).dropna()
     return df if len(df) >= 50 else None
-
-
-def cell_ids(I, S, s_edges):
-    ib = np.clip(((I + 1) / 2 * N_I).astype(int), 0, N_I - 1)
-    sb = np.clip(np.searchsorted(s_edges, S, side="right"), 0, M_S - 1)
-    return ib * M_S + sb
 
 
 # ---------------------------------------------------------------------------

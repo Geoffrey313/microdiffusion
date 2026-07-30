@@ -26,14 +26,13 @@ from pathlib import Path
 import math
 import numpy as np
 import pandas as pd
-import yaml
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from common.paths import load_config, CLEAN_DIR, DATA_EXPORT, PANEL, RESULTS_DIR, DIAG_DIR, FIG_DIR, ensure
+from common.paths import load_config, CLEAN_DIR, DIAG_DIR
+from common.grid import N_I, M_S, cell_ids
 from common.plot_style import ACCENT, ACCENT_DARK, WARN, MUTED, INK, POS, finish, setup_mpl, despine
 
-N_I, M_S = 10, 3
 TRAIN_FRAC = 0.60
 MIN_CELL = 50
 RNG = np.random.default_rng(0)
@@ -55,12 +54,6 @@ def session_increments(l1):
     S = (ask - bid) / mid
     # state known at t aligns with increment to t+1
     return pd.DataFrame({"dx": dx, "I": I[:-1], "S": S[:-1]}).replace([np.inf, -np.inf], np.nan).dropna()
-
-
-def cell_ids(I, S, s_edges):
-    ib = np.clip(((I + 1) / 2 * N_I).astype(int), 0, N_I - 1)
-    sb = np.clip(np.searchsorted(s_edges, S, side="right"), 0, M_S - 1)
-    return ib * M_S + sb
 
 
 def main():

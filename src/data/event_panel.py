@@ -28,16 +28,15 @@ from __future__ import annotations
 from pathlib import Path
 import numpy as np
 import pandas as pd
-import yaml
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from common.paths import load_config, CLEAN_DIR, DATA_EXPORT, PANEL, RESULTS_DIR, DIAG_DIR, FIG_DIR, ensure
+from common.paths import load_config, CLEAN_DIR, DATA_EXPORT
+from common.grid import N_I, M_S
 
 OUT = DATA_EXPORT
 OUT.mkdir(parents=True, exist_ok=True)
 
-N_I, M_S = 10, 3
 TRAIN_FRAC = 0.60
 MIN_MIDS = 200          # per session file, as in session_increments()
 MIN_TRAIN, MIN_TEST = 2000, 1000   # per instrument, as in collect()

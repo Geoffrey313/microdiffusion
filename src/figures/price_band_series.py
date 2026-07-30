@@ -20,16 +20,15 @@ from __future__ import annotations
 from pathlib import Path
 import numpy as np
 import pandas as pd
-import yaml
 from scipy import stats
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from common.paths import load_config, CLEAN_DIR, DATA_EXPORT, PANEL, RESULTS_DIR, DIAG_DIR, FIG_DIR, ensure
-from common.plot_style import finish, setup_mpl, despine, INK, ACCENT, ACCENT_DARK, WARN, POS, MUTED
+from common.paths import load_config, CLEAN_DIR, FIG_DIR
+from common.grid import N_I, M_S, cell_ids
+from common.plot_style import finish, setup_mpl, despine, INK, ACCENT, ACCENT_DARK, WARN, POS
 
 OUTF = FIG_DIR; OUTF.mkdir(parents=True, exist_ok=True)
-N_I, M_S = 10, 3
 TRAIN_FRAC = 0.60
 MIN_CELL = 50
 BPS = 1e4
@@ -56,12 +55,6 @@ def with_next_return(d):
     d = d.copy()
     d["dx"] = d["x"].shift(-1) - d["x"]
     return d.dropna()
-
-
-def cell_ids(I, S, s_edges):
-    ib = np.clip(((I + 1) / 2 * N_I).astype(int), 0, N_I - 1)
-    sb = np.clip(np.searchsorted(s_edges, S, side="right"), 0, M_S - 1)
-    return ib * M_S + sb
 
 
 def main():

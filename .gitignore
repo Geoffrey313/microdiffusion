@@ -33,6 +33,10 @@ data/clean/
 *.mitch
 data/raw/
 
+# External cryptocurrency feed (Appendix E) - never commit; supplied by the
+# replicator at data/crypto/ or via MICRODIFFUSION_CRYPTO_DIR
+data/crypto/
+
 # Large intermediate outputs that may land in data/ during replication
 data/drift_diffusion/
 data/state/

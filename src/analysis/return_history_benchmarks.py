@@ -22,15 +22,14 @@ from __future__ import annotations
 from pathlib import Path
 import numpy as np
 import pandas as pd
-import yaml
 from scipy import optimize, stats
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from common.paths import load_config, CLEAN_DIR, DATA_EXPORT, PANEL, RESULTS_DIR, DIAG_DIR, FIG_DIR, ensure
+from common.paths import load_config, CLEAN_DIR, DIAG_DIR
+from common.grid import N_I, M_S, cell_ids
 
 OUTT = DIAG_DIR / "tables"; OUTT.mkdir(parents=True, exist_ok=True)
-N_I, M_S = 10, 3
 TRAIN_FRAC = 0.60
 MIN_CELL = 50
 FIT_CAP = 12000
@@ -41,12 +40,6 @@ RNG = np.random.default_rng(0)
 
 def parse_date(s):
     mm, dd, yy = s.split("-"); return (int(yy), int(mm), int(dd))
-
-
-def cell_ids(I, S, s_edges):
-    ib = np.clip(((I + 1) / 2 * N_I).astype(int), 0, N_I - 1)
-    sb = np.clip(np.searchsorted(s_edges, S, side="right"), 0, M_S - 1)
-    return ib * M_S + sb
 
 
 def event_frame(l1):

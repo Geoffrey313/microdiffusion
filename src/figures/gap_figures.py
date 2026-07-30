@@ -9,17 +9,16 @@ from __future__ import annotations
 from pathlib import Path
 import numpy as np
 import pandas as pd
-import yaml
 from scipy import stats
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from common.paths import load_config, CLEAN_DIR, DATA_EXPORT, PANEL, RESULTS_DIR, DIAG_DIR, FIG_DIR, ensure
+from common.paths import load_config, CLEAN_DIR, RESULTS_DIR, FIG_DIR
+from common.grid import N_I, M_S, cell_ids
 from common.plot_style import finish, setup_mpl, despine, INK, ACCENT, MUTED
 
 OUT = FIG_DIR
 OUT.mkdir(parents=True, exist_ok=True)
-N_I, M_S = 10, 3
 TRAIN_FRAC = 0.60
 MIN_CELL = 50
 
@@ -36,12 +35,6 @@ def session_increments(l1):
     x = np.log(mid); dx = np.diff(x)
     I = (bsz - asz) / (bsz + asz); S = (ask - bid) / mid
     return pd.DataFrame({"dx": dx, "I": I[:-1], "S": S[:-1]}).replace([np.inf, -np.inf], np.nan).dropna()
-
-
-def cell_ids(I, S, s_edges):
-    ib = np.clip(((I + 1) / 2 * N_I).astype(int), 0, N_I - 1)
-    sb = np.clip(np.searchsorted(s_edges, S, side="right"), 0, M_S - 1)
-    return ib * M_S + sb
 
 
 def collect():
@@ -95,8 +88,14 @@ def main():
     bx_grid, axx_grid, tr = collect()
     sp = stats.spearmanr(tr["a_xx_train"], tr["msq_test"]).correlation
     print(f"pooled transfer Spearman = {sp:.3f}  (n cells = {len(tr)})")
-    # 2D vs 3D microprice OOS (from table 07)
-    o = pd.read_csv(DIAG_DIR / "tables" / "07_microprice_oos_summary.csv").iloc[0]
+    # 2D vs 3D microprice OOS (from table 07); regenerate it if this figure is run
+    # standalone before the analysis stage has produced it.
+    table07 = RESULTS_DIR / "07_microprice_oos_summary.csv"
+    if not table07.exists():
+        print("table 07 missing, running analysis/microprice_oos.py ...")
+        import importlib
+        importlib.import_module("analysis.microprice_oos").main()
+    o = pd.read_csv(table07).iloc[0]
 
     from mpl_toolkits.mplot3d import Axes3D  # noqa: F401  (registers the 3d projection)
     import matplotlib.cm as cm
@@ -125,7 +124,8 @@ def main():
     b.set_xticks(xb); b.set_xticklabels([r"$(I,S)$ model", r"$(x,I,S)$ model"])
     b.set_ylabel(r"out-of-sample $R^2$")
     b.set_title(r"(b) Adding the level $x$ does not help")
-    b.text(0.5, 0.92, rf"$\Delta R^2={o.dR2_mean:+.4f}$" "\n" r"direction $0.57\!\to\!0.56$",
+    b.text(0.5, 0.92, rf"$\Delta R^2={o.dR2_mean:+.4f}$" "\n"
+           rf"hit-rate ${o.hit_2d_mean:.3f}\!\to\!{o.hit_3d_mean:.3f}$",
            transform=b.transAxes, ha="center", va="top", fontsize=8,
            bbox=dict(boxstyle="round,pad=0.35", fc="white", ec=INK, lw=0.6))
     despine(b)

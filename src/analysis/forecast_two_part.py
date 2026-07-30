@@ -23,7 +23,7 @@ import pandas as pd
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from common.paths import load_config, CLEAN_DIR, DATA_EXPORT, PANEL, RESULTS_DIR, DIAG_DIR, FIG_DIR, ensure
+from common.paths import PANEL, RESULTS_DIR
 
 OUT = RESULTS_DIR
 OUT.mkdir(exist_ok=True)

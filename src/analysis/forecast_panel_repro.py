@@ -23,7 +23,8 @@ import pandas as pd
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from common.paths import load_config, CLEAN_DIR, DATA_EXPORT, PANEL, RESULTS_DIR, DIAG_DIR, FIG_DIR, ensure
+from common.paths import PANEL, RESULTS_DIR
+from common.grid import N_I, M_S
 
 OUT = RESULTS_DIR
 OUT.mkdir(exist_ok=True)
@@ -31,7 +32,6 @@ OUT.mkdir(exist_ok=True)
 W = 5
 WINSOR = 0.995
 MIN_CELL = 20
-N_I, M_S = 10, 3
 N_BOOT = 1000
 RNG = np.random.default_rng(0)
 

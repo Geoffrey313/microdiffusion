@@ -8,6 +8,7 @@ it is still centrally defined. To restyle every figure, change the numbers here 
 from __future__ import annotations
 
 import os
+import tempfile
 
 INK = "#1f2933"
 GRID = "#d8d8d8"
@@ -34,7 +35,8 @@ FIG_W = 13         # canonical figure WIDTH (inches) - keep uniform so on-page t
 
 def setup_mpl():
     """Return pyplot after applying a restrained LaTeX-like style."""
-    os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib-codex")
+    os.environ.setdefault(
+        "MPLCONFIGDIR", os.path.join(tempfile.gettempdir(), "matplotlib-microdiffusion"))
     import matplotlib
 
     matplotlib.use("Agg")
@@ -75,5 +77,16 @@ def despine(ax):
 
 
 def finish(fig, path):
-    fig.tight_layout()
-    fig.savefig(path)
+    # tight_layout cannot solve panels with 3d axes and colorbars and warns harmlessly;
+    # savefig.bbox="tight" already crops the figure, so the warning carries no information.
+    import warnings
+    from pathlib import Path
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="Tight layout not applied")
+        fig.tight_layout()
+    # Write the raster the scripts have always produced, and its PDF sibling in the same
+    # call so the manuscript's \includegraphics{...pdf} stays under the reproduction chain
+    # (no manual out-of-chain conversion step). Both carry identical content at savefig.dpi.
+    p = Path(path)
+    fig.savefig(p)
+    fig.savefig(p.with_suffix(".pdf"))

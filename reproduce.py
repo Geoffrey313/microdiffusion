@@ -14,9 +14,11 @@ Usage
     python reproduce.py --rebuild-panel force a rebuild of the event panel
 
 The forecast tables in results/ are the digest-checked outputs. The engine,
-robustness, benchmark and figure stages produce diagnostic and manuscript
-figures that are not tracked; they are run for completeness and to confirm the
-whole chain executes, but they are not part of the digest gate.
+robustness, benchmark, external and figure stages produce diagnostic and
+manuscript figures that are not tracked; they are run for completeness and to
+confirm the whole chain executes, but they are not part of the digest gate. The
+external stage (Appendix E) needs the one-second cryptocurrency feed, which is
+not redistributed with the package; it self-skips when the feed is absent.
 """
 from __future__ import annotations
 import argparse
@@ -47,6 +49,7 @@ FORECAST = [
     "analysis/forecast_nested_ladder.py",
     "analysis/forecast_two_part.py",
     "analysis/forecast_losses_garch.py",
+    "analysis/microprice_oos.py",
 ]
 ROBUSTNESS = [
     "analysis/surface_identifiability.py",
@@ -64,11 +67,18 @@ BENCHMARKS = [
     "analysis/garch_fixedclock.py",
     "analysis/return_history_benchmarks.py",
 ]
+# External-sample robustness (Appendix E). The one-second cryptocurrency feed is
+# not redistributed with the package, so this stage self-skips when the feed is
+# absent and its diagnostic outputs are not part of the digest gate.
+EXTERNAL = [
+    "analysis/crypto_transfer.py",
+]
 FIGURES = [
     "figures/surface_heatmap_counts.py",
     "figures/price_band_series.py",
     "figures/gap_figures.py",
     "figures/garch_figure.py",
+    "figures/descriptive_stats.py",
 ]
 
 
@@ -140,7 +150,7 @@ def main() -> None:
         verify()
         return
 
-    for m in ENGINE + FORECAST + ROBUSTNESS + BENCHMARKS + FIGURES:
+    for m in ENGINE + FORECAST + ROBUSTNESS + BENCHMARKS + EXTERNAL + FIGURES:
         run(m)
     verify()
 

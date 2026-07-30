@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """Two-panel GARCH-comparison figure for Paper 1 (reads the event-clock comparison CSV)."""
 from pathlib import Path
-import numpy as np
 import pandas as pd
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from common.paths import load_config, CLEAN_DIR, DATA_EXPORT, PANEL, RESULTS_DIR, DIAG_DIR, FIG_DIR, ensure
+from common.paths import DIAG_DIR, FIG_DIR
 from common.plot_style import finish, setup_mpl, despine, INK, ACCENT, MUTED
 
 OUT = FIG_DIR
