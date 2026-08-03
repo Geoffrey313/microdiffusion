@@ -1,0 +1,17 @@
+# Replication environment for "The Microdiffusion".
+# The runtime dependencies of src/ and reproduce.py -- the third-party packages
+# imported directly, plus the parquet engine (pyarrow) used by pandas -- pinned
+# to the versions that produce the tracked digests in results/digests.sha256.
+# Tested on CPython 3.11.4.
+#
+#   python -m venv .venv && source .venv/bin/activate
+#   pip install -r requirements.txt
+#   python reproduce.py --check
+
+numpy==2.4.3
+pandas==2.2.3
+scipy==1.17.1
+pyarrow==23.0.1
+matplotlib==3.10.8
+PyYAML==6.0.3
+sortedcontainers==2.4.0

@@ -75,7 +75,8 @@ scope; this is stated with the result.
 
 ## Availability
 
-The processed data are available to referees and replicators on request.
-Contact: geoffrey.ducournau@111dimtech.com
+The processed data are available to referees and replicators on request through the
+journal's editorial system (author contact withheld for double-anonymized review).
 
-Raw tick-by-tick feed data cannot be redistributed; it is proprietary to QSE/Dimtech.
+Raw tick-by-tick feed data cannot be redistributed; it is proprietary to the exchange
+and its data provider.

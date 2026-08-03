@@ -1,9 +1,9 @@
 # The Microdiffusion: Book-State Price Risk and Heavy Tails in Event Time
 
-Replication package for:
+Anonymized replication package for:
 
 > **The Microdiffusion: Book-State Price Risk and Heavy Tails in Event Time**
-> Geoffrey Ducournau, Yibo Wang, Jinliang Li
+> (author identities withheld for double-anonymized peer review)
 
 ## What the paper shows
 
@@ -31,7 +31,7 @@ microdiffusion/
   results/       article tables written by the analyses (with digests.sha256)
   data/          raw and processed inputs, git-ignored (see data/README.md)
   reproduce.py   single deterministic entry point with digest checks
-  environment.yml
+  requirements.txt
   .env.example
 ```
 
@@ -42,28 +42,31 @@ on the current working directory or a machine-specific path.
 ## Requirements
 
 ```bash
-conda env create -f environment.yml
-conda activate market-maker
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
-No credentials are needed; see `.env.example`.
+Python 3.11. No credentials are needed; see `.env.example`.
 
 ## Reproduce
 
 ```bash
 python reproduce.py            # full chain, then verify every tracked digest
-python reproduce.py --fast     # event panel + forecast tables + verify
+python reproduce.py --fast     # event panel + gated tables + verify
 python reproduce.py --check    # verify digests of existing results only
 ```
 
 `reproduce.py` runs the stages in dependency order (data, engine, analysis,
 figures) and checks each tracked result in `results/` against
-`results/digests.sha256`. The forecast tables are the digest-gated outputs; the
-engine, robustness, benchmark and figure stages are run for completeness and
-write diagnostic tables and manuscript figures that are not tracked.
+`results/digests.sha256`. The digest-gated outputs are the forecast tables plus
+the pooled descriptive table `descriptive_stats_qse.csv`; these are exactly what
+`--fast` regenerates before verifying. The remaining engine, robustness,
+benchmark and figure stages are run for completeness and write diagnostic tables
+and manuscript figures that are not tracked.
 
 ## Data
 
-See `data/README.md`. The processed L1 parquet files are available on request:
-geoffrey.ducournau@111dimtech.com. Raw exchange data is proprietary and cannot
+See `data/README.md`. The processed L1 parquet files are available to referees and
+replicators on request through the journal's editorial system (author contact
+withheld for double-anonymized review). Raw exchange data is proprietary and cannot
 be redistributed.
