@@ -161,7 +161,7 @@ def main():
     finish(fig, OUTF / "fig_price_band.png")
     print("[band] wrote paper/figures/fig_price_band.png")
 
-    # ---- companion: return-shape and state-conditional-variance comparison (full held-out set) ----
+    # ---- paired view: return-shape and state-conditional-variance comparison (full held-out set) ----
     te = pd.concat([with_next_return(frame(pd.read_parquet(p))) for p in te_p],
                    ignore_index=True).dropna()
     cteA = cell_ids(te.I.to_numpy(), te.S.to_numpy(), s_edges); dxteA = te.dx.to_numpy()

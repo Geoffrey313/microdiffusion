@@ -9,16 +9,20 @@ the manuscript was written. The digest manifest is results/digests.sha256.
 
 Usage
     python reproduce.py                 run the full chain, then verify digests
-    python reproduce.py --fast          panel (if missing) + forecast tables + verify
+    python reproduce.py --fast          panel (if missing) + gated tables + verify
     python reproduce.py --check         only verify digests of existing results
     python reproduce.py --rebuild-panel force a rebuild of the event panel
 
-The forecast tables in results/ are the digest-checked outputs. The engine,
-robustness, benchmark, external and figure stages produce diagnostic and
-manuscript figures that are not tracked; they are run for completeness and to
-confirm the whole chain executes, but they are not part of the digest gate. The
-external stage (Appendix E) needs the one-second cryptocurrency feed, which is
-not redistributed with the package; it self-skips when the feed is absent.
+The digest-checked outputs are the forecast tables plus the pooled descriptive
+table descriptive_stats_qse.csv (written by figures/descriptive_stats.py). These
+gated producers are exactly the modules --fast runs before verify(). The
+remaining engine, robustness, benchmark, external and figure stages produce
+diagnostic and manuscript figures that are not tracked; they are run for
+completeness and to confirm the whole chain executes, but they are not part of
+the digest gate. The
+external stages (Appendix E, event-time cryptocurrency quotes; Appendix F, a
+United States large-cap level-one panel) need feeds that are not redistributed
+with the package; each self-skips when its feed is absent.
 """
 from __future__ import annotations
 import argparse
@@ -51,6 +55,9 @@ FORECAST = [
     "analysis/forecast_losses_garch.py",
     "analysis/microprice_oos.py",
 ]
+# Figure-stage producer of a digest-gated table (the pooled descriptive table
+# descriptive_stats_qse.csv). It is gated, so it must run under --fast too.
+GATED_FIGURES = ["figures/descriptive_stats.py"]
 ROBUSTNESS = [
     "analysis/surface_identifiability.py",
     "analysis/var_backtest.py",
@@ -67,18 +74,21 @@ BENCHMARKS = [
     "analysis/garch_fixedclock.py",
     "analysis/return_history_benchmarks.py",
 ]
-# External-sample robustness (Appendix E). The one-second cryptocurrency feed is
-# not redistributed with the package, so this stage self-skips when the feed is
+# External-sample robustness (Appendices E and F). Neither the event-time
+# cryptocurrency quotes feed nor the United States level-one panel is
+# redistributed with the package, so each stage self-skips when its feed is
 # absent and its diagnostic outputs are not part of the digest gate.
 EXTERNAL = [
     "analysis/crypto_transfer.py",
+    "figures/crypto_appendix_figures.py",
+    "analysis/us_transfer.py",
+    "figures/us_appendix_figures.py",
 ]
 FIGURES = [
     "figures/surface_heatmap_counts.py",
     "figures/price_band_series.py",
     "figures/gap_figures.py",
     "figures/garch_figure.py",
-    "figures/descriptive_stats.py",
 ]
 
 
@@ -125,7 +135,7 @@ def verify() -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Reproduce the replication package.")
-    ap.add_argument("--fast", action="store_true", help="panel + forecast tables + verify only")
+    ap.add_argument("--fast", action="store_true", help="panel + gated tables + verify only")
     ap.add_argument("--check", action="store_true", help="verify digests only, run nothing")
     ap.add_argument("--rebuild-panel", action="store_true", help="rebuild the event panel even if present")
     args = ap.parse_args()
@@ -145,12 +155,12 @@ def main() -> None:
         print(f"[reproduce] event panel present, skipping build ({PANEL.relative_to(ROOT)})")
 
     if args.fast:
-        for m in FORECAST:
+        for m in FORECAST + GATED_FIGURES:
             run(m)
         verify()
         return
 
-    for m in ENGINE + FORECAST + ROBUSTNESS + BENCHMARKS + EXTERNAL + FIGURES:
+    for m in ENGINE + FORECAST + ROBUSTNESS + BENCHMARKS + EXTERNAL + GATED_FIGURES + FIGURES:
         run(m)
     verify()
 

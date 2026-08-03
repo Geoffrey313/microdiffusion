@@ -1,36 +1,37 @@
 #!/usr/bin/env python3
 """
-crypto_transfer.py - external-sample robustness check (Appendix E).
+us_transfer.py - external United States large-cap robustness check (Appendix F).
 
-Repeats the diffusion-surface transfer test on the external event-time
-cryptocurrency sample (Coinbase best quotes; see data/crypto_panel.py). For each
-instrument the days are walked forward (train on the W prior first-of-month
-day-blocks, test on the next), the one-step diffusion surface
-a_xx(I, S) is estimated on the training block, and its per-cell values are
-correlated against the realised per-cell mean square of the increment on the
-held-out block. The headline is the joint (I, S) rank correlation with an
-instrument-clustered bootstrap interval; a shuffled-cell placebo (which destroys
-the state-to-row link) provides the null. The script also emits the per-asset
-descriptive statistics that feed the appendix descriptive table.
+Repeats the diffusion-surface transfer test on the external United States equity
+sample (Nasdaq TotalView-ITCH top of book; see data/us_panel.py). For each
+instrument the sample days are walked forward (train on the W prior day-blocks,
+test on the next), the one-step diffusion surface a_xx(I, S) is estimated on the
+training block, and its per-cell values are correlated against the realised
+per-cell mean square of the increment on the held-out block. The headline is the
+joint (I, S) rank correlation with an instrument-clustered bootstrap interval; a
+shuffled-cell placebo (which destroys the state-to-row link) provides the null.
+The script also emits the per-asset descriptive statistics that feed the appendix
+descriptive table.
 
-This is the reproduction of the two numbers reported in Appendix E:
+This is the reproduction of the two numbers reported in Appendix F:
   - joint (I, S) transfer rank correlation with its 95% instrument-clustered
     interval, and the shuffled-cell placebo close to zero;
   - per-instrument distributions of the relative spread, imbalance, absolute
     one-step return, and best-level notional depth in thousand US dollars.
 
-The cryptocurrency feed is external to the repository (see common.paths.CRYPTO_DIR
-and data/README.md). If it is not present the script prints a notice and exits
+The United States panel is external to the repository (see common.paths.US_DIR
+and data/README.md) and is rebuilt from the free Nasdaq sample by
+data/us_itch_fetch.py. If it is not present the script prints a notice and exits
 without error, so the reproduction chain still completes on the primary QSE
 sample alone. Outputs are diagnostic and are not part of the digest gate, because
-the external feed is not redistributed with the package.
+the external panel is not redistributed with the package.
 
-Inputs : CRYPTO_DIR/<SYM>_<YYYY-MM-DD>.csv.gz via data/crypto_panel.py.
-Outputs: results/diagnostics/tables/crypto_transfer_summary.csv,
-         results/diagnostics/tables/crypto_transfer_by_symbol.csv,
-         results/diagnostics/tables/crypto_descriptives.csv,
-         paper/sections/desc_external.tex.
-Serves : Appendix E (external-sample robustness).
+Inputs : US_DIR/<SYM>_<YYYY-MM-DD>.parquet via data/us_panel.py.
+Outputs: results/diagnostics/tables/us_transfer_summary.csv,
+         results/diagnostics/tables/us_transfer_by_symbol.csv,
+         results/diagnostics/tables/us_descriptives.csv,
+         paper/sections/desc_us.tex.
+Serves : Appendix F (United States large-cap robustness).
 """
 from __future__ import annotations
 import sys
@@ -41,9 +42,9 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common.paths import DIAG_DIR, REPO_ROOT, ensure, load_config
-from data.crypto_panel import PANEL, available, build_states, load_clean
+from data.us_panel import PANEL, available, build_states, load_clean
 
-W = 5                       # walk-forward training window (day-blocks)
+W = 4                       # walk-forward training window (day-blocks); seven sample days
 L = 50                      # trailing realised-variance window (rows)
 WINSOR = 0.995              # winsorise the squared increment at this train quantile
 MIN_CELL = 20               # minimum count per cell (train and test) to enter the transfer
@@ -130,7 +131,7 @@ def run_transfer(states, n_I, m_S):
     sessions = sorted({s for _, s in states},
                       key=lambda x: tuple(int(v) for v in (x.split("-")[2], x.split("-")[0], x.split("-")[1])))
     symbols = sorted({y for y, _ in states})
-    print(f"[crypto] {len(symbols)} instruments, {len(sessions)} day-blocks; walk-forward W={W}; "
+    print(f"[us] {len(symbols)} instruments, {len(sessions)} day-blocks; walk-forward W={W}; "
           f"one-step a_xx(I,S); L={L}, winsor={WINSOR}")
 
     recs, skips = [], []
@@ -252,7 +253,7 @@ def run_transfer(states, n_I, m_S):
 
     df = pd.DataFrame(recs)
     if df.empty:
-        sys.exit("[crypto] no folds produced")
+        sys.exit("[us] no folds produced")
 
     by_sym = df.groupby("symbol")[["n_common_cells", "corr_spearman", "corr_I_only", "corr_S_only",
                                    "corr_interaction", "skill_state", "skill_marginal"]].mean().reset_index()
@@ -279,7 +280,7 @@ def run_transfer(states, n_I, m_S):
 
 
 # --------------------------------------------------------------------------- #
-#  per-asset descriptive statistics (Appendix E table)
+#  per-asset descriptive statistics (Appendix F table)
 # --------------------------------------------------------------------------- #
 def describe(x):
     x = np.asarray(x, float)
@@ -305,14 +306,14 @@ def descriptives(clean):
         spread_bps = 1e4 * (ask - bid) / mid
         imb = (bsz - asz) / (bsz + asz)
         # One-step return is computed within each day-block and then concatenated:
-        # the day-blocks are the first calendar day of separate months, so a diff
-        # across a block boundary would be a spurious month-long jump, not a move.
+        # the day-blocks are separate sample days, so a diff across a block boundary
+        # would be a spurious multi-month jump, not a move.
         ret_bps = np.concatenate([
             1e4 * np.abs(np.diff(np.log(clean[k]["mid"].to_numpy(float)),
                                  prepend=np.log(clean[k]["mid"].to_numpy(float))[0]))
             for k in keys])
-        # Best-level depth as notional in thousand US dollars, so it is comparable
-        # across instruments whose base-unit sizes are not (a coin, a token, ...).
+        # Best-level depth as notional in thousand US dollars, comparable across
+        # instruments whose share prices differ by an order of magnitude.
         depth_k = (bsz * bid + asz * ask) / 1000.0
         for var, x in [("Spread (bps)", spread_bps), ("Imbalance", imb),
                        ("|Return| (bps)", ret_bps), ("Depth ($k)", depth_k)]:
@@ -327,21 +328,21 @@ def _fmt(v, dp):
     return f"{v:.{dp}f}"
 
 
-def write_desc_external(desc: pd.DataFrame):
-    """Write the Appendix E descriptive table directly from the diagnostic CSV."""
+def write_desc_us(desc: pd.DataFrame):
+    """Write the Appendix F descriptive table directly from the diagnostic CSV."""
     order = [s for s in PANEL if s in set(desc["symbol"])]
     lines = [
-        r"\begin{table}[t]",
+        r"\begin{table}[p]",
         r"\centering",
-        r"\caption{Per-asset summary statistics for the external cryptocurrency sample. For each asset the table reports the distribution of the relative spread (in basis points), the best-level imbalance, the absolute one-step log return (in basis points), and the best-level depth; the observation count for each asset is given under its name. Depth is the notional resting at the touch, in thousands of US dollars. The one-step return is computed within each day-block. Crypto is recorded in event time from the Coinbase best-quote feed on the first calendar day of each month from October 2025 to June 2026 (nine day-blocks per asset).}",
-        r"\label{tab:descr-ext}",
-        r"\small",
+        r"\caption{Per-asset summary statistics for the external United States large-cap sample. For each asset the table reports the distribution of the relative spread (in basis points), the best-level imbalance, the absolute one-step log return (in basis points), and the best-level depth; the observation count for each asset is given under its name. Depth is the notional resting at the touch, in thousands of US dollars. The one-step return is computed within each day-block. The sample is the top of book reconstructed from the free Nasdaq TotalView-ITCH sample, recorded in event time over the regular session of seven sample days from January 2019 to January 2020.}",
+        r"\label{tab:descr-us}",
+        r"\footnotesize",
         r"\setlength{\tabcolsep}{4.5pt}",
         r"\begin{tabular}{@{}llrrrrrrr@{}}",
         r"\toprule",
         r"Asset & Variable & Mean & SD & Min & p25 & Median & p75 & Max \\",
         r"\midrule",
-        r"\multicolumn{9}{@{}l}{\emph{Cryptocurrencies (event time, nine first-of-month day-blocks)}}\\",
+        r"\multicolumn{9}{@{}l}{\emph{United States large-caps (event time, seven Nasdaq sample days)}}\\",
         r"\midrule",
     ]
     variables = ["Spread (bps)", "Imbalance", "|Return| (bps)", "Depth ($k)"]
@@ -354,7 +355,7 @@ def write_desc_external(desc: pd.DataFrame):
     for i, sym in enumerate(order):
         block = desc[desc["symbol"] == sym].set_index("variable")
         n_obs = float(block["n_obs"].iloc[0]) / 1_000_000.0
-        display_sym = sym.replace("-USD", "")
+        display_sym = sym
         for j, var in enumerate(variables):
             r = block.loc[var]
             dp = 3 if var in ("Imbalance", "Depth ($k)") else 2
@@ -375,19 +376,19 @@ def write_desc_external(desc: pd.DataFrame):
 
     tex = "\n".join(lines)
     for path in [
-        REPO_ROOT / "paper" / "sections" / "desc_external.tex",
-        REPO_ROOT / "journal" / "JEF" / "sections" / "desc_external.tex",
+        REPO_ROOT / "paper" / "sections" / "desc_us.tex",
+        REPO_ROOT / "journal" / "JEF" / "sections" / "desc_us.tex",
     ]:
         if path.parent.exists():
             path.write_text(tex)
-            print(f"[crypto] wrote {path.relative_to(REPO_ROOT)}")
+            print(f"[us] wrote {path.relative_to(REPO_ROOT)}")
 
 
 # --------------------------------------------------------------------------- #
 def main():
     if not available():
-        print("[crypto] external cryptocurrency feed not found; skipping the "
-              "Appendix E external check (see data/README.md).")
+        print("[us] external United States panel not found; skipping the "
+              "Appendix F external check (see data/README.md).")
         return
 
     cfg = load_config()
@@ -400,19 +401,19 @@ def main():
     desc = descriptives(clean)
 
     out = ensure(DIAG_DIR / "tables")
-    summ.to_csv(out / "crypto_transfer_summary.csv", index=False)
-    by_sym.to_csv(out / "crypto_transfer_by_symbol.csv", index=False)
-    desc.to_csv(out / "crypto_descriptives.csv", index=False)
-    write_desc_external(desc)
+    summ.to_csv(out / "us_transfer_summary.csv", index=False)
+    by_sym.to_csv(out / "us_transfer_by_symbol.csv", index=False)
+    desc.to_csv(out / "us_descriptives.csv", index=False)
+    write_desc_us(desc)
 
-    print("\n=== external cryptocurrency transfer of a_xx(I,S) ===")
+    print("\n=== external United States transfer of a_xx(I,S) ===")
     print(summ.round(4).to_string(index=False))
     print("\nper instrument:")
     print(by_sym.round(4).to_string(index=False))
     n_obs = int(desc.groupby("symbol")["n_obs"].first().sum())
-    print(f"\n[crypto] {desc['symbol'].nunique()} instruments, {n_obs:,} level-one observations")
+    print(f"\n[us] {desc['symbol'].nunique()} instruments, {n_obs:,} level-one observations")
     if skips:
-        print(f"[crypto] skipped {len(skips)} folds; first few: {skips[:6]}")
+        print(f"[us] skipped {len(skips)} folds; first few: {skips[:6]}")
 
 
 if __name__ == "__main__":

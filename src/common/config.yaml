@@ -1,5 +1,3 @@
-data:
-  out_dir: ../data
 parser:
   field_separator: ;;
   msg_marker: ' MESSAGE: '

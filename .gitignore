@@ -37,6 +37,10 @@ data/raw/
 # replicator at data/crypto/ or via MICRODIFFUSION_CRYPTO_DIR
 data/crypto/
 
+# External United States level-one panel (Appendix F) - never commit; rebuilt by
+# the replicator into data/us_itch/ or via MICRODIFFUSION_US_DIR
+data/us_itch/
+
 # Large intermediate outputs that may land in data/ during replication
 data/drift_diffusion/
 data/state/
@@ -46,6 +50,7 @@ data/figures/
 # ── Local manuscript and build folders ───────────────────────────────────────
 paper/
 journal/
+docs/internal/
 
 # ── OS noise ─────────────────────────────────────────────────────────────────
 .DS_Store
@@ -63,3 +68,6 @@ results/diagnostics/
 *.zip
 note_to_*.md
 memo_to_*.md
+
+# ── Internal audit notes: never published ─────────────────────────────────────
+docs/internal/

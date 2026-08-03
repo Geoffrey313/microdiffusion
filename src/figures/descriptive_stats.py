@@ -12,7 +12,7 @@ Variables (all read from the exported event panel, event_panel.parquet):
   - best-level imbalance  I, dimensionless in [-1, 1]
   - absolute one-step log return  |dx_log|, reported in basis points
 
-Serves table tab:descr-qse-full, the full-distribution companion to the per-asset
+Serves table tab:descr-qse-full, the full-distribution counterpart to the per-asset
 summary table tab:descr-qse. Every number the manuscript prints in that table is a
 row of this script's output; nothing is entered by hand.
 
