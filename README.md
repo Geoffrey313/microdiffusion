@@ -18,6 +18,30 @@ and how large the move is), while the imbalance is a real contemporaneous
 second-moment modulation that adds no one-step point-forecast increment and does
 not transfer as a day-to-day shape.
 
+## Core hypotheses and results
+
+The paper rests on one maintained assumption (H1) and four substantive
+hypotheses (H2-H5):
+
+- **H1 (maintained):** the conditional drift is effectively two-dimensional in
+  the book state (I, S); the price level adds no further information about the
+  expected next move, and is the coordinate left free to diffuse.
+- **H2:** the microdiffusion a_xx(I, S) is a stable function of the book state,
+  reappearing on disjoint, unseen days.
+- **H3:** a Gaussian innovation is insufficient; the scaled residual is
+  heavy-tailed and requires a Generalized Hyperbolic law.
+- **H4:** scale (the surface) and shape (the heavy tail) are separately
+  identified and each is necessary.
+- **H5:** the one-step forecast content of the state is concentrated in the
+  spread; the imbalance moves the contemporaneous variance but adds no further
+  one-step accuracy.
+
+**Headline results:** the state-to-variance ranking transfers out of sample, the
+spread-driven level transfers across days, instruments, and volatility regimes,
+the imbalance transfers weakly as a shape; the heavy-tailed innovation reduces
+extreme-tail under-coverage in intraday VaR backtests and ties a jointly
+estimated GARCH-t on predictive log score while beating its Gaussian version.
+
 ## Repository layout
 
 ```
@@ -63,6 +87,12 @@ the pooled descriptive table `descriptive_stats_qse.csv`; these are exactly what
 `--fast` regenerates before verifying. The remaining engine, robustness,
 benchmark and figure stages are run for completeness and write diagnostic tables
 and manuscript figures that are not tracked.
+
+Note the difference between the modes: `--check` only re-hashes the tracked
+`results/*.csv` already on disk against the manifest (a fast integrity check, it
+recomputes nothing), whereas `--fast` and the full run **regenerate** the gated
+tables from the data and then verify. A genuine reproduction therefore requires a
+`--fast` or full run, not `--check` alone.
 
 ## Data
 
