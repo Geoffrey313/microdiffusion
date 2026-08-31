@@ -326,7 +326,7 @@ def main():
         y=1.02
     )
     finish(fig, OUTF / "fig_var_backtest.png")
-    print("\n[var_backtest] wrote paper/figures/fig_var_backtest.png")
+    print("\n[var_backtest] wrote manuscript/en/ssrn/figures/fig_var_backtest.png")
 
 
 if __name__ == "__main__":

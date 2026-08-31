@@ -25,7 +25,7 @@ on excess kurtosis, tail exceedance P(|z|>k), and OOS log-likelihood gain of GH 
 We do NOT pre-write the result.
 
 Outputs: output/tables/sde_zeromove.csv, output/tables/sde_zeromove_cells.csv,
-         ../paper/figures/fig_zeromove.png
+         ../manuscript/en/ssrn/figures/fig_zeromove.png
 Run: python3 zeromove.py
 """
 from __future__ import annotations

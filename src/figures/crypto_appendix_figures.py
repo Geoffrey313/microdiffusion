@@ -25,8 +25,8 @@ same estimator. The feed is external (see common.paths.CRYPTO_DIR); if it is abs
 the script prints a notice and exits without error, so the chain still completes.
 
 Inputs : CRYPTO_DIR/<SYM>_<YYYY-MM-DD>.csv.gz via data/crypto_panel.py.
-Outputs: paper/figures/fig_crypto_axx.{png,pdf},
-         paper/figures/fig_crypto_heavytail.{png,pdf}.
+Outputs: manuscript/en/ssrn/figures/fig_crypto_axx.{png,pdf},
+         manuscript/en/ssrn/figures/fig_crypto_heavytail.{png,pdf}.
 Serves : Appendix E (external-sample robustness).
 """
 from __future__ import annotations

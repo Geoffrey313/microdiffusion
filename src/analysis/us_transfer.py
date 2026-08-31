@@ -47,7 +47,7 @@ Outputs: results/diagnostics/tables/us_transfer_summary.csv          (principal
              cross-regime, and the whole-span single-split transparency contrast),
          results/diagnostics/tables/us_transfer_by_symbol.csv,
          results/diagnostics/tables/us_descriptives.csv,
-         paper/sections/desc_us.tex.
+         manuscript/en/ssrn/sections/desc_us.tex.
 Serves : Appendix F (United States large-cap robustness).
 """
 from __future__ import annotations
@@ -512,8 +512,8 @@ def write_desc_us(desc: pd.DataFrame):
 
     tex = "\n".join(lines)
     for path in [
-        REPO_ROOT / "paper" / "sections" / "desc_us.tex",
-        REPO_ROOT / "journal" / "JEF" / "sections" / "desc_us.tex",
+        REPO_ROOT / "manuscript" / "en" / "ssrn" / "sections" / "desc_us.tex",
+        REPO_ROOT / "manuscript" / "en" / "journal_versions" / "JEF" / "sections" / "desc_us.tex",
     ]:
         if path.parent.exists():
             path.write_text(tex)

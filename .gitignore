@@ -48,8 +48,7 @@ data/tables/
 data/figures/
 
 # ── Local manuscript and build folders ───────────────────────────────────────
-paper/
-journal/
+manuscript/
 docs/internal/
 
 # ── OS noise ─────────────────────────────────────────────────────────────────

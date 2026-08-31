@@ -21,7 +21,7 @@ We do two things:
 All residuals are the train-standardised, held-out z=(dx-b_x)/sqrt(a_xx), as in the paper.
 
 Outputs: output/tables/sde_gh_loio.csv, output/tables/sde_gh_loio_tercile.csv,
-         ../paper/figures/fig_gh_loio.png
+         ../manuscript/en/ssrn/figures/fig_gh_loio.png
 Run: python3 innovation_loio.py
 """
 from __future__ import annotations

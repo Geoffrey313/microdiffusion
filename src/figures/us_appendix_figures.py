@@ -25,8 +25,8 @@ same estimator. The panel is external (see common.paths.US_DIR); if it is absent
 the script prints a notice and exits without error, so the chain still completes.
 
 Inputs : US_DIR/<SYM>_<YYYY-MM-DD>.parquet via data/us_panel.py.
-Outputs: paper/figures/fig_us_axx.{png,pdf},
-         paper/figures/fig_us_heavytail.{png,pdf}.
+Outputs: manuscript/en/ssrn/figures/fig_us_axx.{png,pdf},
+         manuscript/en/ssrn/figures/fig_us_heavytail.{png,pdf}.
 Serves : Appendix F (United States large-cap robustness).
 """
 from __future__ import annotations

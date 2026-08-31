@@ -16,7 +16,7 @@ For each experiment, measure:
   2. Tail transfer: mean per-observation OOS log-likelihood gain of GH over Gaussian
 
 Output:
-  - paper/figures/fig_regime_transfer.png
+  - manuscript/en/ssrn/figures/fig_regime_transfer.png
   - stdout: summary table
 """
 from __future__ import annotations
@@ -442,7 +442,7 @@ def main():
         y=1.02
     )
     finish(fig, OUTF / "fig_regime_transfer.png")
-    print("\n[regime_transfer] wrote paper/figures/fig_regime_transfer.png")
+    print("\n[regime_transfer] wrote manuscript/en/ssrn/figures/fig_regime_transfer.png")
 
 
 if __name__ == "__main__":

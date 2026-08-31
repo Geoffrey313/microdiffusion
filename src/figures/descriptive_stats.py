@@ -18,7 +18,7 @@ row of this script's output; nothing is entered by hand.
 
 Output:
   results/descriptive_stats_qse.csv     one row per variable, the eight statistics
-  paper/sections/tab_descr_qse_full.tex  the LaTeX table \\input by the appendix
+  manuscript/en/ssrn/sections/tab_descr_qse_full.tex  the LaTeX table \\input by the appendix
 """
 from __future__ import annotations
 from pathlib import Path

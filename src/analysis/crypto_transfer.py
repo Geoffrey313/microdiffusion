@@ -29,7 +29,7 @@ Inputs : CRYPTO_DIR/<SYM>_<YYYY-MM-DD>.csv.gz via data/crypto_panel.py.
 Outputs: results/diagnostics/tables/crypto_transfer_summary.csv,
          results/diagnostics/tables/crypto_transfer_by_symbol.csv,
          results/diagnostics/tables/crypto_descriptives.csv,
-         paper/sections/desc_external.tex.
+         manuscript/en/ssrn/sections/desc_external.tex.
 Serves : Appendix E (external-sample robustness).
 """
 from __future__ import annotations
@@ -375,8 +375,8 @@ def write_desc_external(desc: pd.DataFrame):
 
     tex = "\n".join(lines)
     for path in [
-        REPO_ROOT / "paper" / "sections" / "desc_external.tex",
-        REPO_ROOT / "journal" / "JEF" / "sections" / "desc_external.tex",
+        REPO_ROOT / "manuscript" / "en" / "ssrn" / "sections" / "desc_external.tex",
+        REPO_ROOT / "manuscript" / "en" / "journal_versions" / "JEF" / "sections" / "desc_external.tex",
     ]:
         if path.parent.exists():
             path.write_text(tex)

@@ -18,7 +18,7 @@ Anchors
     US_DIR       external United States level-one panel (Appendix F, git-ignored)
     RESULTS_DIR  results/              article tables written by the analyses
     DIAG_DIR     results/diagnostics/  diagnostic-only tables and figures
-    FIG_DIR      paper/figures/        manuscript figures (local paper build)
+    FIG_DIR      manuscript/en/ssrn/figures/   manuscript figures (local build)
 """
 from __future__ import annotations
 import os
@@ -56,11 +56,12 @@ US_DIR = Path(os.environ.get("MICRODIFFUSION_US_DIR", DATA_DIR / "us_itch"))
 # environment redirects the whole battery at once.
 RESULTS_DIR = Path(os.environ.get("MICRODIFFUSION_RESULTS_DIR", REPO_ROOT / "results"))
 DIAG_DIR = RESULTS_DIR / "diagnostics"
-FIG_DIR = Path(os.environ.get("MICRODIFFUSION_FIG_DIR", REPO_ROOT / "paper" / "figures"))
+_SSRN = REPO_ROOT / "manuscript" / "en" / "ssrn"
+FIG_DIR = Path(os.environ.get("MICRODIFFUSION_FIG_DIR", _SSRN / "figures"))
 # LaTeX table fragments \input by the manuscript. Overridable so a parallel run
 # writes its tables outside the manuscript tree instead of overwriting the primary
 # QSE fragments.
-SECTIONS_DIR = Path(os.environ.get("MICRODIFFUSION_SECTIONS_DIR", REPO_ROOT / "paper" / "sections"))
+SECTIONS_DIR = Path(os.environ.get("MICRODIFFUSION_SECTIONS_DIR", _SSRN / "sections"))
 
 
 def load_config() -> dict:

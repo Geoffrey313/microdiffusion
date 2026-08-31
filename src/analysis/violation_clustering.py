@@ -21,7 +21,7 @@ Figure: two scatter panels of p_ind (y-axis model vs x-axis baseline),
 Decision: report State Gaussian vs Flat in manuscript if clear majority of
           instruments show improvement; otherwise frame as tail-law result only.
 
-Output: paper/figures/fig_clustering.png
+Output: manuscript/en/ssrn/figures/fig_clustering.png
 """
 from __future__ import annotations
 from pathlib import Path
@@ -334,7 +334,7 @@ def main():
         y=1.02
     )
     finish(fig, OUTF / "fig_clustering.png")
-    print("\n[clustering] wrote paper/figures/fig_clustering.png")
+    print("\n[clustering] wrote manuscript/en/ssrn/figures/fig_clustering.png")
 
 
 if __name__ == "__main__":

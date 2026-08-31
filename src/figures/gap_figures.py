@@ -3,7 +3,7 @@
 gap_figures.py - produce the two gap figures for Paper 1:
   (Fig 2) drift surface b_x(I,S) heat map + 2D-vs-3D out-of-sample comparison (Assumption 2 / H1);
   (Fig 3) diffusion surface a_xx(I,S) heat map + out-of-sample transfer scatter (H2, lead result).
-Outputs go to ../paper/figures/.
+Outputs go to ../manuscript/en/ssrn/figures/.
 """
 from __future__ import annotations
 from pathlib import Path

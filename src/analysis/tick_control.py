@@ -29,7 +29,7 @@ Decision (printed at the end):
                       risk bands.
 
 Outputs: output/tables/sde_tick_control.csv, output/tables/sde_tick_control_summary.csv,
-         ../paper/figures/fig_tick_control.png
+         ../manuscript/en/ssrn/figures/fig_tick_control.png
 Run: python3 tick_control.py
 """
 from __future__ import annotations

@@ -8,7 +8,7 @@ reader sees how well each cell is populated. We pool across instruments (each no
 own median a_xx so only the shape over (I,S) is shown) and annotate every cell with its total
 observation count.
 
-Outputs: ../paper/figures/fig_axx_heatmap_counts.png
+Outputs: ../manuscript/en/ssrn/figures/fig_axx_heatmap_counts.png
 """
 from __future__ import annotations
 from pathlib import Path

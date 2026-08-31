@@ -159,7 +159,7 @@ def main():
     ax1.legend(loc="upper left", fontsize=8); despine(ax1)
     fig.suptitle(r"One-step-ahead predictive interval for the price from the state-dependent SDE", y=1.0)
     finish(fig, OUTF / "fig_price_band.png")
-    print("[band] wrote paper/figures/fig_price_band.png")
+    print("[band] wrote manuscript/en/ssrn/figures/fig_price_band.png")
 
     # ---- paired view: return-shape and state-conditional-variance comparison (full held-out set) ----
     te = pd.concat([with_next_return(frame(pd.read_parquet(p))) for p in te_p],
@@ -202,7 +202,7 @@ def main():
     figc.suptitle(rf"Model vs realised on held-out data ({sym}): the distribution of one-step returns "
                   rf"and of the conditional variance", y=1.01)
     finish(figc, OUTF / "fig_model_vs_realized.png")
-    print("[band] wrote paper/figures/fig_model_vs_realized.png")
+    print("[band] wrote manuscript/en/ssrn/figures/fig_model_vs_realized.png")
 
 
 if __name__ == "__main__":

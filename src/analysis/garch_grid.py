@@ -235,7 +235,7 @@ def main():
     OUT = FIG_DIR
     OUT.mkdir(parents=True, exist_ok=True)
     finish(fig, OUT / "fig_garch_calibration.png")
-    print("[grid] wrote paper/figures/fig_garch_calibration.png and tables/sde_garch_calibration.csv")
+    print("[grid] wrote manuscript/en/ssrn/figures/fig_garch_calibration.png and tables/sde_garch_calibration.csv")
 
 
 if __name__ == "__main__":
