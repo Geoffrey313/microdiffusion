@@ -44,15 +44,20 @@ not part of the digest gate.
 
 ## External United States large-cap sample (Appendix F)
 
-The second external check uses a reconstructed event-time top-of-book feed for the
-ten largest capitalisations listed on the Nasdaq Stock Market over the sample
-window (`AAPL`, `MSFT`, `AMZN`, `GOOGL`, `FB`, `INTC`, `CSCO`, `PEP`, `NVDA`,
-`CMCSA`). The source is the free Nasdaq TotalView-ITCH 5.0 sample, an
+The second external check uses a reconstructed event-time top-of-book feed for a
+fixed ex-ante panel of large, actively traded capitalisations listed on the
+Nasdaq Stock Market over the sample window (`AAPL`, `MSFT`, `AMZN`, `GOOGL`,
+`FB`, `INTC`, `CSCO`, `PEP`, `NVDA`, `CMCSA`). `FB` is the canonical key for
+the Facebook/Meta instrument and is matched to `META` from 2022-06-09 onward.
+The source is the free Nasdaq TotalView-ITCH 5.0 sample, an
 order-by-order message feed served without a key or a fee from
-`https://emi.nasdaq.com/ITCH/Nasdaq ITCH/`. Seven sample days are available and
-each is one walk-forward day-block:
+`https://emi.nasdaq.com/ITCH/Nasdaq ITCH/`. Seventeen dated sample days are
+currently configured and each is one walk-forward day-block:
 
-  01302019, 03272019, 07302019, 08302019, 10302019, 12302019, 01302020
+  01302019, 03272019, 07302019, 08302019, S101819-v50,
+  10302019, 12302019, 01302020, S071321-v50, S081321-v50,
+  S112825-v50, S120825-v50, S120925-v50, S121025-v50,
+  S121125-v50, S121225-v50, S061226-v50
 
 `src/data/us_itch_fetch.py` streams each day through `curl` and decompresses it in
 flight, reconstructs the top of book for the target instruments, and writes one
@@ -69,9 +74,9 @@ with the columns `ts`, `bid`, `bid_sz`, `ask`, `ask_sz`. Place the files under
 directory. Cleaning, state construction, and the walk-forward transfer test are run
 by `src/analysis/us_transfer.py`, wired into `reproduce.py` as an external stage.
 When the panel is absent the stage self-skips and the rest of the chain completes
-on the QSE sample alone. The largest United States capitalisations whose primary
-listing is another venue are not carried by this single-venue feed and are out of
-scope; this is stated with the result.
+on the QSE sample alone. United States capitalisations whose primary listing is
+another venue are not carried by this single-venue feed and are out of scope;
+this is stated with the result.
 
 ## Availability
 

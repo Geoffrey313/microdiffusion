@@ -3,19 +3,33 @@
 us_transfer.py - external United States large-cap robustness check (Appendix F).
 
 Repeats the diffusion-surface transfer test on the external United States equity
-sample (Nasdaq TotalView-ITCH top of book; see data/us_panel.py). For each
-instrument the sample days are walked forward (train on the W prior day-blocks,
-test on the next), the one-step diffusion surface a_xx(I, S) is estimated on the
-training block, and its per-cell values are correlated against the realised
-per-cell mean square of the increment on the held-out block. The headline is the
-joint (I, S) rank correlation with an instrument-clustered bootstrap interval; a
-shuffled-cell placebo (which destroys the state-to-row link) provides the null.
-The script also emits the per-asset descriptive statistics that feed the appendix
-descriptive table.
+sample (Nasdaq TotalView-ITCH top of book; see data/us_panel.py). The principal
+result is the walk-forward transfer: for each instrument the sample days are
+walked forward (train on the W prior day-blocks, test on the next), the one-step
+surface a_xx(I, S) is estimated on the training block, and its per-cell values are
+correlated against the realised per-cell mean square of the increment on the
+held-out block. Because W=4 keeps each fold's train and test days close, the
+walk-forward is not dominated by the multi-year span of the free sample days. The
+headline is the joint (I, S) rank correlation with an instrument-clustered
+bootstrap interval; a shuffled-cell placebo provides the null.
 
-This is the reproduction of the two numbers reported in Appendix F:
-  - joint (I, S) transfer rank correlation with its 95% instrument-clustered
-    interval, and the shuffled-cell placebo close to zero;
+The walk-forward is corroborated by transfer within a homogeneous era (first 60%
+of an era's days train, last 40% test, for the 2019-2020 and 2025-2026 blocks) and
+across volatility regimes (train on calm day-blocks, test on stress, and the
+reverse). A single 60/40 split over the whole 2019-2026 span is reported only as a
+transparency contrast: it is dominated by the multi-year gap and so weakens, which
+reflects microstructure change over the span rather than a failure of the surface.
+
+The one-step directional forecast decomposition (H5) is NOT evaluated on this
+venue: at the one-cent tick the mega-cap mid is unchanged on most events, so the
+one-step target is mechanically degenerate; H5 is assessed on the primary QSE
+panel. The script also emits the per-asset descriptive statistics that feed the
+appendix descriptive table.
+
+Reported in Appendix F:
+  - walk-forward joint (I, S) transfer rank correlation with its 95%
+    instrument-clustered interval, and the shuffled-cell placebo near zero;
+  - corroborating within-era and cross-regime surface transfer;
   - per-instrument distributions of the relative spread, imbalance, absolute
     one-step return, and best-level notional depth in thousand US dollars.
 
@@ -27,7 +41,10 @@ sample alone. Outputs are diagnostic and are not part of the digest gate, becaus
 the external panel is not redistributed with the package.
 
 Inputs : US_DIR/<SYM>_<YYYY-MM-DD>.parquet via data/us_panel.py.
-Outputs: results/diagnostics/tables/us_transfer_summary.csv,
+Outputs: results/diagnostics/tables/us_transfer_summary.csv          (principal
+             walk-forward transfer metrics),
+         results/diagnostics/tables/us_transfer_corroboration.csv     (within-era,
+             cross-regime, and the whole-span single-split transparency contrast),
          results/diagnostics/tables/us_transfer_by_symbol.csv,
          results/diagnostics/tables/us_descriptives.csv,
          paper/sections/desc_us.tex.
@@ -44,7 +61,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common.paths import DIAG_DIR, REPO_ROOT, ensure, load_config
 from data.us_panel import PANEL, available, build_states, load_clean
 
-W = 4                       # walk-forward training window (day-blocks); seven sample days
+W = 4                       # walk-forward training window over available day-blocks
 L = 50                      # trailing realised-variance window (rows)
 WINSOR = 0.995              # winsorise the squared increment at this train quantile
 MIN_CELL = 20               # minimum count per cell (train and test) to enter the transfer
@@ -280,6 +297,125 @@ def run_transfer(states, n_I, m_S):
 
 
 # --------------------------------------------------------------------------- #
+#  retained transfer designs: within a homogeneous era and across volatility
+#  regimes. The freely available Nasdaq sample days are sparse and span materially
+#  different market periods, so a single chronological walk-forward that pools the
+#  whole 2019-2026 span conflates surface transfer with multi-year microstructure
+#  change; it is kept only as a named secondary diagnostic. The principal designs
+#  evaluate transfer where it is well posed: between comparable days.
+# --------------------------------------------------------------------------- #
+def _year(session: str) -> int:
+    """Calendar year of a session key in MM-DD-YY form."""
+    return 2000 + int(session.split("-")[2])
+
+
+def _cell_axx(keys, states, n_I, m_S):
+    """cell -> mean squared increment over the given (symbol, session) keys."""
+    cs, ys = [], []
+    for k in keys:
+        c, y = increments(states[k], n_I, m_S)
+        cs.append(c)
+        ys.append(y)
+    if not cs:
+        return {}, {}
+    c = np.concatenate(cs)
+    y = np.concatenate(ys)
+    d = pd.DataFrame({"c": c, "y": y})
+    return d.groupby("c")["y"].mean().to_dict(), d.groupby("c")["y"].size().to_dict()
+
+
+def surface_transfer(states, split_fn, n_I, m_S, min_cell=MIN_CELL):
+    """Pooled per-(symbol, cell) transfer of the one-step surface a_xx(I, S).
+
+    For every instrument the caller's split_fn returns (train_keys, test_keys).
+    The surface is the per-cell mean squared increment on the training keys; it is
+    correlated against the realised per-cell mean square on the held-out keys.
+    Cells are pooled over instruments and the Spearman rank correlation is the
+    transfer statistic, matching the primary diffusion-surface transfer test.
+    """
+    a_tr_all, a_te_all = [], []
+    for sym in sorted({y for y, _ in states}):
+        tr_keys, te_keys = split_fn(sym)
+        if not tr_keys or not te_keys:
+            continue
+        a_tr, n_tr = _cell_axx(tr_keys, states, n_I, m_S)
+        a_te, n_te = _cell_axx(te_keys, states, n_I, m_S)
+        for c, v in a_tr.items():
+            if c in a_te and n_tr[c] >= min_cell and n_te.get(c, 0) >= min_cell:
+                a_tr_all.append(v)
+                a_te_all.append(a_te[c])
+    if len(a_tr_all) < 4:
+        return np.nan, len(a_tr_all)
+    rho = float(pd.Series(a_tr_all).corr(pd.Series(a_te_all), method="spearman"))
+    return rho, len(a_tr_all)
+
+
+def sessions_of(states, sym):
+    """Chronologically sorted sessions available for one instrument."""
+    ss = [s for (y, s) in states if y == sym]
+    return sorted(ss, key=lambda s: (_year(s), int(s.split("-")[0]), int(s.split("-")[1])))
+
+
+def intra_era_transfer(states, years, n_I, m_S):
+    """Within-era transfer: per instrument, first 60% of the era's days train,
+    last 40% test. Restricting to one era removes the multi-year gap."""
+    def split(sym):
+        ss = [s for s in sessions_of(states, sym) if _year(s) in years]
+        if len(ss) < 2:
+            return [], []
+        ntr = max(1, int(round(0.60 * len(ss))))
+        return [(sym, s) for s in ss[:ntr]], [(sym, s) for s in ss[ntr:]]
+    return surface_transfer(states, split, n_I, m_S)
+
+
+def crossera_single_split_transfer(states, n_I, m_S):
+    """Single chronological 60/40 split over the whole 2019-2026 span, per
+    instrument. Because the days are non-contiguous and span years, this trains on
+    the earliest days and tests on the latest, so the estimate is dominated by the
+    multi-year gap; it is reported only as a transparency contrast to the local and
+    within-era designs, never as a headline."""
+    def split(sym):
+        ss = sessions_of(states, sym)
+        if len(ss) < 2:
+            return [], []
+        ntr = max(1, int(round(0.60 * len(ss))))
+        return [(sym, s) for s in ss[:ntr]], [(sym, s) for s in ss[ntr:]]
+    return surface_transfer(states, split, n_I, m_S)
+
+
+def regime_label(states):
+    """Label each session calm or stress by its cross-instrument realised variance,
+    the mean squared one-step increment, split at the pooled median so the two
+    regimes are balanced. Realised variance is used rather than the median absolute
+    increment, which is zero at the one-cent tick (the mid is unchanged on most
+    events) and would leave the split degenerate."""
+    rv = {}
+    for s in sorted({ss for _, ss in states}):
+        d2 = []
+        for (y, ss) in states:
+            if ss == s:
+                x = states[(y, ss)].sort_values("ts_event")["x"].to_numpy(float)
+                d2.append(np.diff(x) ** 2)
+        if d2:
+            rv[s] = float(np.mean(np.concatenate(d2)))
+    if not rv:
+        return {}, np.nan
+    cut = float(np.median(list(rv.values())))
+    return {s: ("stress" if v > cut else "calm") for s, v in rv.items()}, cut
+
+
+def regime_transfer(states, reg, src, dst, n_I, m_S):
+    """Cross-regime transfer: train the surface on every src-regime day, test on
+    every dst-regime day, per instrument."""
+    def split(sym):
+        ss = sessions_of(states, sym)
+        tr = [(sym, s) for s in ss if reg.get(s) == src]
+        te = [(sym, s) for s in ss if reg.get(s) == dst]
+        return tr, te
+    return surface_transfer(states, split, n_I, m_S)
+
+
+# --------------------------------------------------------------------------- #
 #  per-asset descriptive statistics (Appendix F table)
 # --------------------------------------------------------------------------- #
 def describe(x):
@@ -334,7 +470,7 @@ def write_desc_us(desc: pd.DataFrame):
     lines = [
         r"\begin{table}[p]",
         r"\centering",
-        r"\caption{Per-asset summary statistics for the external United States large-cap sample. For each asset the table reports the distribution of the relative spread (in basis points), the best-level imbalance, the absolute one-step log return (in basis points), and the best-level depth; the observation count for each asset is given under its name. Depth is the notional resting at the touch, in thousands of US dollars. The one-step return is computed within each day-block. The sample is the top of book reconstructed from the free Nasdaq TotalView-ITCH sample, recorded in event time over the regular session of seven sample days from January 2019 to January 2020.}",
+        r"\caption{Per-asset summary statistics for the external United States large-cap sample. For each asset the table reports the distribution of the relative spread (in basis points), the best-level imbalance, the absolute one-step log return (in basis points), and the best-level depth; the observation count for each asset is given under its name. Depth is the notional resting at the touch, in thousands of US dollars. The one-step return is computed within each day-block. The sample is the top of book reconstructed from the free Nasdaq TotalView-ITCH sample, recorded in event time over the regular session of the retained sample days.}",
         r"\label{tab:descr-us}",
         r"\footnotesize",
         r"\setlength{\tabcolsep}{4.5pt}",
@@ -342,7 +478,7 @@ def write_desc_us(desc: pd.DataFrame):
         r"\toprule",
         r"Asset & Variable & Mean & SD & Min & p25 & Median & p75 & Max \\",
         r"\midrule",
-        r"\multicolumn{9}{@{}l}{\emph{United States large-caps (event time, seven Nasdaq sample days)}}\\",
+        r"\multicolumn{9}{@{}l}{\emph{United States large-caps (event time, retained Nasdaq sample days)}}\\",
         r"\midrule",
     ]
     variables = ["Spread (bps)", "Imbalance", "|Return| (bps)", "Depth ($k)"]
@@ -397,19 +533,47 @@ def main():
 
     clean = load_clean()
     states = build_states(clean)
-    summ, by_sym, skips = run_transfer(states, n_I, m_S)
-    desc = descriptives(clean)
-
     out = ensure(DIAG_DIR / "tables")
+
+    # --- Principal result: the walk-forward surface transfer (Appendix F
+    #     headline). W=4 keeps each fold's train and test days close, so it is not
+    #     dominated by the multi-year span. ------------------------------------- #
+    summ, by_sym, skips = run_transfer(states, n_I, m_S)
     summ.to_csv(out / "us_transfer_summary.csv", index=False)
     by_sym.to_csv(out / "us_transfer_by_symbol.csv", index=False)
+
+    # --- Corroborating designs: transfer within a homogeneous era and across
+    #     volatility regimes, plus a single whole-span 60/40 split reported only as
+    #     a transparency contrast (it is dominated by the 2019-2026 gap). -------- #
+    reg, cut = regime_label(states)
+    n_calm = sum(v == "calm" for v in reg.values())
+    n_stress = sum(v == "stress" for v in reg.values())
+    designs = [
+        ("intra_era_2019_2020", intra_era_transfer(states, {2019, 2020}, n_I, m_S)),
+        ("intra_era_2025_2026", intra_era_transfer(states, {2025, 2026}, n_I, m_S)),
+        ("regime_calm_to_stress", regime_transfer(states, reg, "calm", "stress", n_I, m_S)),
+        ("regime_stress_to_calm", regime_transfer(states, reg, "stress", "calm", n_I, m_S)),
+        ("crossera_single_split_2019_2026", crossera_single_split_transfer(states, n_I, m_S)),
+    ]
+    corrob = pd.DataFrame([{"design": lbl, "surface_rho": rho, "n_cells": npts}
+                           for lbl, (rho, npts) in designs])
+    corrob.to_csv(out / "us_transfer_corroboration.csv", index=False)
+
+    desc = descriptives(clean)
     desc.to_csv(out / "us_descriptives.csv", index=False)
     write_desc_us(desc)
 
-    print("\n=== external United States transfer of a_xx(I,S) ===")
+    print("\n=== external United States transfer of a_xx(I,S): principal walk-forward ===")
     print(summ.round(4).to_string(index=False))
-    print("\nper instrument:")
-    print(by_sym.round(4).to_string(index=False))
+    print("\ncorroborating designs (pooled surface rank correlation):")
+    print(corrob.round(4).to_string(index=False))
+    print(f"[us] regime split at median realised variance = {cut:.2e}: "
+          f"{n_calm} calm, {n_stress} stress day-blocks")
+    print("\n[us] H5 (one-step directional forecast) is NOT evaluated on this venue: "
+          "at the one-cent tick the mega-cap mid is unchanged on most events "
+          "(median absolute one-step return ~0 bps), so the one-step target is "
+          "mechanically degenerate. H5 is assessed on the primary QSE panel, where "
+          "the tick geometry yields a non-degenerate target.")
     n_obs = int(desc.groupby("symbol")["n_obs"].first().sum())
     print(f"\n[us] {desc['symbol'].nunique()} instruments, {n_obs:,} level-one observations")
     if skips:

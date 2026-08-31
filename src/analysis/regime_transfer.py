@@ -270,17 +270,25 @@ def oosllik_gain(surfaces_tr, gh_params, files, te_keys):
         te = pd.concat(frames, ignore_index=True)
         cte = cell_ids(te["I"].to_numpy(), te["S"].to_numpy(), s_edges)
         dxte = te["dx"].to_numpy()
-        for i, c in enumerate(cte):
-            if c not in axx or axx[c] <= 0:
-                continue
-            sigma = np.sqrt(axx[c])
-            z = (dxte[i] - bx[c]) / sigma
-            if not np.isfinite(z):
-                continue
-            # unit-variance GH density: rescale by sd_gh
-            ll_gh = float(gh.logpdf(z * sd_gh) + np.log(sd_gh) - np.log(sigma))
-            ll_g  = float(stats.norm.logpdf(z) - np.log(sigma))
-            gains.append(ll_gh - ll_g)
+        # Vectorised over test rows. A per-row genhyperbolic.logpdf is a Bessel
+        # evaluation; scalar-by-scalar it is intractable on dense sessions, so map
+        # each row's cell to its train drift and scale through a small per-cell
+        # lookup and evaluate both densities on the whole array at once. Rows whose
+        # cell has no positive train variance map to NaN and drop out, exactly as
+        # the per-row guard did.
+        axx_arr = np.full(N_I * M_S, np.nan)
+        bx_arr = np.full(N_I * M_S, np.nan)
+        for c in range(N_I * M_S):
+            if c in axx and axx[c] > 0:
+                axx_arr[c] = axx[c]; bx_arr[c] = bx[c]
+        sigma = np.sqrt(axx_arr[cte])
+        z = (dxte - bx_arr[cte]) / sigma
+        ok = np.isfinite(z)
+        z = z[ok]; sigma = sigma[ok]
+        if z.size:
+            ll_gh = gh.logpdf(z * sd_gh) + np.log(sd_gh) - np.log(sigma)
+            ll_g = stats.norm.logpdf(z) - np.log(sigma)
+            gains.extend((ll_gh - ll_g).tolist())
     return float(np.mean(gains)) if gains else np.nan
 
 

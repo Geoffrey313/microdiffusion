@@ -49,9 +49,18 @@ CRYPTO_DIR = Path(os.environ.get("MICRODIFFUSION_CRYPTO_DIR", DATA_DIR / "crypto
 # wherever MICRODIFFUSION_US_DIR points.
 US_DIR = Path(os.environ.get("MICRODIFFUSION_US_DIR", DATA_DIR / "us_itch"))
 
-RESULTS_DIR = REPO_ROOT / "results"
+# Output roots. Defaults sit under the repository so the primary QSE reproduction
+# is unchanged; optional environment overrides let a parallel run (e.g. the
+# external United States battery) write its tables and figures to a separate tree
+# without editing any stage. Every stage imports these anchors, so overriding the
+# environment redirects the whole battery at once.
+RESULTS_DIR = Path(os.environ.get("MICRODIFFUSION_RESULTS_DIR", REPO_ROOT / "results"))
 DIAG_DIR = RESULTS_DIR / "diagnostics"
-FIG_DIR = REPO_ROOT / "paper" / "figures"
+FIG_DIR = Path(os.environ.get("MICRODIFFUSION_FIG_DIR", REPO_ROOT / "paper" / "figures"))
+# LaTeX table fragments \input by the manuscript. Overridable so a parallel run
+# writes its tables outside the manuscript tree instead of overwriting the primary
+# QSE fragments.
+SECTIONS_DIR = Path(os.environ.get("MICRODIFFUSION_SECTIONS_DIR", REPO_ROOT / "paper" / "sections"))
 
 
 def load_config() -> dict:

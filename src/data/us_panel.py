@@ -4,8 +4,8 @@ us_panel.py - external United States large-cap level-one adapter and state build
 
 Assembles the book state used by the United States equity robustness check
 (Appendix F of the manuscript) from a reconstructed event-time top-of-book feed
-for the largest instruments listed on the Nasdaq Stock Market. Each source file
-is a compact level-one panel written by data/us_itch_fetch.py from the free
+for a fixed panel of large Nasdaq-listed instruments. Each source file is a
+compact level-one panel written by data/us_itch_fetch.py from the free
 Nasdaq TotalView-ITCH 5.0 sample: one row per change of the top of book, so the
 sampling clock is the book event itself, not a fixed wall-clock bin. The raw
 message feed is NOT part of the repository, and neither is the reconstructed
@@ -23,10 +23,10 @@ Two steps, both in memory (no intermediate files are written here):
 One sample day is one walk-forward day-block. The spread state is a
 within-instrument tercile rather than a fixed tick count so the spread dimension
 stays comparable with the primary sample and across day-blocks, even though the
-instruments share a one-cent tick. The instrument panel is the set of the largest
-Nasdaq-listed capitalisations over the sample window; the very largest United
-States capitalisations that are listed on other venues do not appear in this feed
-and are therefore out of scope, a limitation stated with the result.
+instruments share a one-cent tick. The instrument panel is fixed ex ante and
+contains large, actively traded Nasdaq-listed capitalisations over the sample
+window; United States capitalisations listed on other venues do not appear in
+this feed and are therefore out of scope, a limitation stated with the result.
 
 Inputs : US_DIR/<SYM>_<YYYY-MM-DD>.parquet for SYM in PANEL (external,
          git-ignored; built by us_itch_fetch.py).
@@ -41,11 +41,13 @@ import pandas as pd
 
 from common.paths import US_DIR
 
-# The ten largest capitalisations listed on the Nasdaq Stock Market over the
-# sample window (2019-2020). Names whose primary listing is another venue are not
-# carried by this single-venue feed and are out of scope; this is stated with the
-# result. FB is the ticker under which the parent of the social network traded
-# during the sample window.
+# A fixed ex-ante panel of large, actively traded capitalisations listed on the
+# Nasdaq Stock Market over the sample window. Names whose primary listing is
+# another venue are not carried by this single-venue feed and are out of scope;
+# this is stated with the result. FB is the canonical key for the Facebook/Meta
+# instrument; its traded ticker becomes META on 2022-06-09, resolved in
+# data/us_itch_fetch.py (traded_ticker) so the instrument stays continuous across
+# the extended sample.
 PANEL = ("AAPL", "MSFT", "AMZN", "GOOGL", "FB", "INTC", "CSCO", "PEP", "NVDA", "CMCSA")
 
 # Contiguous per-session event cap. It bounds memory and run time; one regular

@@ -27,9 +27,9 @@ import pandas as pd
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from common.paths import PANEL, RESULTS_DIR, REPO_ROOT
+from common.paths import PANEL, RESULTS_DIR, SECTIONS_DIR
 
-SECTIONS = REPO_ROOT / "paper" / "sections"
+SECTIONS = SECTIONS_DIR
 
 VARIABLES = [
     ("Relative spread (bps)",      "S_mid",  lambda a: a * 1e4),

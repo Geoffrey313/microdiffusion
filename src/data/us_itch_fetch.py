@@ -3,10 +3,11 @@
 us_itch_fetch.py - build the external United States level-one panel (Appendix F).
 
 Reads the free Nasdaq TotalView-ITCH 5.0 sample and writes, for each target
-instrument and sample day, a compact event-time top-of-book panel. The seven
-sample days that Nasdaq serves without a key or a fee span January 2019 to
-January 2020, which is the walk-forward day-block granularity the external check
-uses. The message feed is order-by-order (level three): every resting order
+instrument and sample day, a compact event-time top-of-book panel. The sample
+days that Nasdaq serves without a key or a fee span 2019 to 2026, each one walk-
+forward day-block; see DAYS for the exact list and the two file namings that
+carry the same ITCH 5.0 format. The message feed is order-by-order (level three):
+every resting order
 carries a reference, and each execution, cancellation, and replacement cites it.
 This module reconstructs only the top of book (best bid and ask price and the
 size resting there) from that stream, which is all the level-one state the
@@ -28,7 +29,7 @@ reproduction chain: analysis/us_transfer.py self-skips when the panel is absent.
 Provenance and the sample-day list are documented in data/README.md.
 
 Usage
-    python src/data/us_itch_fetch.py                       # all seven sample days
+    python src/data/us_itch_fetch.py                       # all configured sample days
     python src/data/us_itch_fetch.py --days 2020-01-30     # one day
     python src/data/us_itch_fetch.py --source /path/to.gz --days 2020-01-30
     MICRODIFFUSION_US_DIR=/path python src/data/us_itch_fetch.py
@@ -51,18 +52,54 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common.paths import US_DIR, ensure
 from data.us_panel import MAX_EVENTS, PANEL
 
-# The seven Nasdaq TotalView-ITCH 5.0 sample days served free from the public
-# endpoint, keyed by their calendar day. Each is one walk-forward day-block.
+# The Nasdaq TotalView-ITCH 5.0 sample days served free from the public endpoint,
+# keyed by their calendar day. Each is one walk-forward day-block. Two file
+# namings coexist on the endpoint for the same ITCH 5.0 message format: the older
+# MMDDYYYY.NASDAQ_ITCH50.gz and the SMMDDYY-v50.txt.gz series; both decode with
+# the same parser. Availability verified by HEAD on 2026-08-30.
 BASE = "https://emi.nasdaq.com/ITCH/Nasdaq%20ITCH/"
 DAYS = {
     "2019-01-30": BASE + "01302019.NASDAQ_ITCH50.gz",
     "2019-03-27": BASE + "03272019.NASDAQ_ITCH50.gz",
     "2019-07-30": BASE + "07302019.NASDAQ_ITCH50.gz",
     "2019-08-30": BASE + "08302019.NASDAQ_ITCH50.gz",
+    "2019-10-18": BASE + "S101819-v50.txt.gz",
     "2019-10-30": BASE + "10302019.NASDAQ_ITCH50.gz",
     "2019-12-30": BASE + "12302019.NASDAQ_ITCH50.gz",
     "2020-01-30": BASE + "01302020.NASDAQ_ITCH50.gz",
+    "2021-07-13": BASE + "S071321-v50.txt.gz",
+    "2021-08-13": BASE + "S081321-v50.txt.gz",
+    "2025-11-28": BASE + "S112825-v50.txt.gz",
+    "2025-12-08": BASE + "S120825-v50.txt.gz",
+    "2025-12-09": BASE + "S120925-v50.txt.gz",
+    "2025-12-10": BASE + "S121025-v50.txt.gz",
+    "2025-12-11": BASE + "S121125-v50.txt.gz",
+    "2025-12-12": BASE + "S121225-v50.txt.gz",
+    "2026-06-12": BASE + "S061226-v50.txt.gz",
 }
+
+# Corporate actions over the extended sample. The panel keys an instrument by a
+# canonical symbol, but the ticker in force can change across the years the sample
+# now spans; on a given day the stream carries the ticker traded that day. Meta
+# Platforms (Facebook) changed its ticker from FB to META effective 2022-06-09, so
+# the canonical instrument "FB" is carried as FB before that date and as META on or
+# after it. traded_ticker() resolves the canonical symbol to the ticker in force on
+# a day; extract() maps that back to the canonical symbol so the instrument is
+# continuous across the whole sample. (On the post-change days a security also
+# trades under a reassigned "FB" ticker; the mapping targets META, so that
+# unrelated issuer is correctly ignored.)
+TICKER_HISTORY = {
+    "FB": [("2022-06-09", "META")],   # canonical -> [(effective_date, ticker), ...]
+}
+
+
+def traded_ticker(symbol: str, day: str) -> str:
+    """Return the ticker under which a canonical panel symbol traded on `day`."""
+    ticker = symbol
+    for effective, renamed in sorted(TICKER_HISTORY.get(symbol, [])):
+        if day >= effective:
+            ticker = renamed
+    return ticker
 
 _PRICE_SCALE = 10_000.0                 # ITCH price is an integer in units of $0.0001
 _NS = 1_000_000_000
@@ -238,7 +275,9 @@ def extract(source: str, day: str, symbols, out_dir: Path,
     each time its best bid or ask (price or size) changes within the regular
     session, up to cap rows per instrument.
     """
-    targets = {s.encode().ljust(8): s for s in symbols}     # stock symbol on 8 bytes
+    # Map the ticker traded on this day (8 bytes) back to the canonical panel
+    # symbol, so a mid-sample ticker change (e.g. FB -> META) stays one instrument.
+    targets = {traded_ticker(s, day).encode().ljust(8): s for s in symbols}
     locate_of: dict[int, str] = {}                          # locate -> target symbol
     order_sym: dict[int, str] = {}                          # order ref -> symbol
     order_ref: dict[int, tuple] = {}                        # order ref -> (side, price, shares)

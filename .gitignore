@@ -71,3 +71,7 @@ memo_to_*.md
 
 # ── Internal audit notes: never published ─────────────────────────────────────
 docs/internal/
+.audit/
+data_us/
+results_us/
+results/diagnostics/

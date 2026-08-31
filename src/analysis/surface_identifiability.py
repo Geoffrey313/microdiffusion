@@ -33,6 +33,20 @@ MIN_CELL = 50
 MIN_TAIL = 300
 
 
+def loglog_slope(x, y):
+    """Slope of a log-log least-squares fit over strictly positive, finite pairs.
+
+    A box with a zero or non-finite realised variance (possible on a sparse
+    external session) would send np.log to -inf and make polyfit's SVD fail; those
+    pairs are dropped. Dense samples where every box is positive are unaffected.
+    """
+    x = np.asarray(x, float); y = np.asarray(y, float)
+    m = np.isfinite(x) & np.isfinite(y) & (x > 0) & (y > 0)
+    if m.sum() < 2:
+        return float("nan")
+    return float(np.polyfit(np.log(x[m]), np.log(y[m]), 1)[0])
+
+
 def parse_date(s):
     mm, dd, yy = s.split("-"); return (int(yy), int(mm), int(dd))
 
@@ -106,11 +120,11 @@ def main():
     # ---- statistics ----
     sp_size = stats.spearmanr(df["a_xx_train"], df["realised_var_test"]).correlation   # SIZE tracks a_xx
     sp_mult = stats.spearmanr(df["a_xx_train"], df["Ghat"]).correlation                # multiplier vs a_xx (BIASED: shared denom)
-    slope = np.polyfit(np.log(df["a_xx_train"]), np.log(df["Ghat"]), 1)[0]
+    slope = loglog_slope(df["a_xx_train"], df["Ghat"])
     # de-biased: multiplier (denominator = block A) vs an INDEPENDENT scale (block B)
     dd = df.dropna(subset=["Ghat_dbias", "a_indep_B"])
     sp_mult_db = stats.spearmanr(dd["a_indep_B"], dd["Ghat_dbias"]).correlation
-    slope_db = np.polyfit(np.log(dd["a_indep_B"]), np.log(dd["Ghat_dbias"]), 1)[0]
+    slope_db = loglog_slope(dd["a_indep_B"], dd["Ghat_dbias"])
     D_var = float(np.std(np.log(df["realised_var_test"])))                             # cross-box log-dispersion of size
     D_G = float(np.std(np.log(df["Ghat"])))                                            # ... of the multiplier
     absorbed = 1.0 - (D_G ** 2) / (D_var ** 2)                                         # fraction of log-var dispersion a_xx soaks up
