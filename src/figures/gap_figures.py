@@ -15,7 +15,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common.paths import load_config, CLEAN_DIR, RESULTS_DIR, FIG_DIR
 from common.grid import N_I, M_S, cell_ids
-from common.plot_style import finish, setup_mpl, despine, INK, ACCENT, MUTED
+from common.plot_style import finish, setup_mpl, despine, INK, ACCENT, MUTED, T
 
 OUT = FIG_DIR
 OUT.mkdir(parents=True, exist_ok=True)
@@ -111,21 +111,21 @@ def main():
     norm = Normalize(vmin=-vmax, vmax=vmax)
     a.plot_surface(Xg, Yg, bx_grid, cmap="RdBu_r", norm=norm, rstride=1, cstride=1,
                    linewidth=0.3, edgecolor="0.35", antialiased=True, alpha=0.97)
-    a.set_xlabel(r"imbalance $I$", labelpad=2); a.set_ylabel(r"spread $S$", labelpad=2)
+    a.set_xlabel(T(r"imbalance $I$"), labelpad=2); a.set_ylabel(T(r"spread $S$"), labelpad=2)
     a.set_zlabel(r"$b_x/\sqrt{a_{xx}}$", labelpad=2)
-    a.set_yticks([0, 1, 2]); a.set_yticklabels([r"tight", r"mid", r"wide"])
+    a.set_yticks([0, 1, 2]); a.set_yticklabels([T(r"tight"), T(r"mid"), T(r"wide")])
     a.view_init(elev=24, azim=-58)
-    a.set_title(r"(a) Conditional drift surface $b_x(I,S)$", pad=0)
+    a.set_title("(a) " + T(r"Conditional drift surface $b_x(I,S)$"), pad=0)
     fig.colorbar(cm.ScalarMappable(norm=norm, cmap="RdBu_r"), ax=a, shrink=0.55, pad=0.10,
                  label=r"$b_x/\sqrt{a_{xx}}$")
     b = fig.add_subplot(1, 2, 2)
     xb = np.arange(2)
     b.bar(xb, [o.R2_2D_mean, o.R2_3D_mean], width=0.5, color=[ACCENT, MUTED])
-    b.set_xticks(xb); b.set_xticklabels([r"$(I,S)$ model", r"$(x,I,S)$ model"])
-    b.set_ylabel(r"out-of-sample $R^2$")
-    b.set_title(r"(b) Adding the level $x$ does not help")
+    b.set_xticks(xb); b.set_xticklabels([T(r"$(I,S)$ model"), T(r"$(x,I,S)$ model")])
+    b.set_ylabel(T(r"out-of-sample $R^2$"))
+    b.set_title("(b) " + T(r"Adding the level $x$ does not help"))
     b.text(0.5, 0.92, rf"$\Delta R^2={o.dR2_mean:+.4f}$" "\n"
-           rf"hit-rate ${o.hit_2d_mean:.3f}\!\to\!{o.hit_3d_mean:.3f}$",
+           + T(r"hit-rate") + rf" ${o.hit_2d_mean:.3f}\!\to\!{o.hit_3d_mean:.3f}$",
            transform=b.transAxes, ha="center", va="top", fontsize=8,
            bbox=dict(boxstyle="round,pad=0.35", fc="white", ec=INK, lw=0.6))
     despine(b)
@@ -138,11 +138,11 @@ def main():
     norm2 = Normalize(vmin=float(np.nanmin(Z)), vmax=float(np.nanmax(Z)))
     a2.plot_surface(Xg, Yg, Z, cmap="viridis", norm=norm2, rstride=1, cstride=1,
                     linewidth=0.3, edgecolor="0.3", antialiased=True, alpha=0.97)
-    a2.set_xlabel(r"imbalance $I$", labelpad=2); a2.set_ylabel(r"spread $S$", labelpad=2)
+    a2.set_xlabel(T(r"imbalance $I$"), labelpad=2); a2.set_ylabel(T(r"spread $S$"), labelpad=2)
     a2.set_zlabel(r"$\log_{10}[a_{xx}/\mathrm{med}]$", labelpad=2)
-    a2.set_yticks([0, 1, 2]); a2.set_yticklabels([r"tight", r"mid", r"wide"])
+    a2.set_yticks([0, 1, 2]); a2.set_yticklabels([T(r"tight"), T(r"mid"), T(r"wide")])
     a2.view_init(elev=24, azim=-58)
-    a2.set_title(r"(a) Diffusion surface $a_{xx}(I,S)$", pad=0)
+    a2.set_title("(a) " + T(r"Diffusion surface $a_{xx}(I,S)$"), pad=0)
     fig2.colorbar(cm.ScalarMappable(norm=norm2, cmap="viridis"), ax=a2, shrink=0.55, pad=0.10,
                   label=r"$\log_{10}[a_{xx}/\mathrm{median}]$")
     b2 = fig2.add_subplot(1, 2, 2)
@@ -150,9 +150,9 @@ def main():
     lim = [tr["a_xx_train"].min() * 1e8, tr["a_xx_train"].max() * 1e8]
     b2.plot(lim, lim, color=INK, ls="--", lw=1, label=r"$y=x$")
     b2.set_xscale("log"); b2.set_yscale("log")
-    b2.set_xlabel(r"train $a_{xx}(c)$  [bps$^2$]")
-    b2.set_ylabel(r"held-out $\mathbb{E}[(\Delta x)^2\,|\,c]$  [bps$^2$]")
-    b2.set_title(rf"(b) Out-of-sample transfer (Spearman {sp:.2f})")
+    b2.set_xlabel(T(r"train $a_{xx}(c)$  [bps$^2$]"))
+    b2.set_ylabel(T(r"held-out $\mathbb{E}[(\Delta x)^2\,|\,c]$  [bps$^2$]"))
+    b2.set_title("(b) " + T(r"Out-of-sample transfer (Spearman") + f" {sp:.2f})")
     b2.legend(loc="upper left")
     despine(b2)
     finish(fig2, OUT / "fig_axx_surface.png")

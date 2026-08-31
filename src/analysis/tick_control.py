@@ -41,7 +41,7 @@ from scipy import stats
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common.paths import load_config, CLEAN_DIR, DIAG_DIR, FIG_DIR
-from common.plot_style import finish, setup_mpl, despine, INK, ACCENT, ACCENT_DARK, MUTED
+from common.plot_style import finish, setup_mpl, despine, INK, ACCENT, ACCENT_DARK, MUTED, T
 
 OUTT = DIAG_DIR / "tables"; OUTT.mkdir(parents=True, exist_ok=True)
 OUTF = FIG_DIR; OUTF.mkdir(parents=True, exist_ok=True)
@@ -284,12 +284,12 @@ def main():
                 if 0 <= ii < N_I:
                     prof[r, ii] = v[k]
         mprof = np.nanmean(prof, axis=0)
-        lab = rf"$S={SPREAD_TICKS[strat]}$ tick" + (r"$+$" if strat == len(SPREAD_TICKS) - 1 else "")
+        lab = rf"$S={SPREAD_TICKS[strat]}$ " + T(r"tick") + (r"$+$" if strat == len(SPREAD_TICKS) - 1 else "")
         a.plot(I_CENT, mprof, "-o", color=cols[strat], ms=4, lw=1.6, label=lab)
     a.axvline(0, color=INK, lw=0.6, ls=":")
-    a.set_xlabel(r"best-level imbalance $I$")
-    a.set_ylabel(r"normalised diffusion $a_{xx}/\langle a_{xx}\rangle$ (within stratum)")
-    a.set_title(r"(a) Imbalance still shapes $a_{xx}$ within fixed spread-in-ticks")
+    a.set_xlabel(T(r"best-level imbalance $I$"))
+    a.set_ylabel(T(r"normalised diffusion $a_{xx}/\langle a_{xx}\rangle$ (within stratum)"))
+    a.set_title("(a) " + T(r"Imbalance still shapes $a_{xx}$ within fixed spread-in-ticks"))
     a.legend(loc="upper center", fontsize=8, ncol=2); despine(a)
 
     # (b) HONEST within-stratum transfer of the imbalance SHAPE: log-demeaned train vs test
@@ -304,13 +304,13 @@ def main():
     lim = [np.nanmin(dtr), np.nanmax(dtr)]
     b.plot(lim, lim, color=INK, ls="--", lw=1, label=r"$y=x$")
     b.axhline(0, color=INK, lw=0.5, ls=":"); b.axvline(0, color=INK, lw=0.5, ls=":")
-    b.set_xlabel(r"train $\log a_{xx}$, demeaned within instrument$\times$stratum")
-    b.set_ylabel(r"held-out $\log a_{xx}$, demeaned")
-    b.set_title(rf"(b) Within-stratum imbalance transfer (Spearman {rho_demeaned:.2f}, weak)")
+    b.set_xlabel(T(r"train $\log a_{xx}$, demeaned within instrument$\times$stratum"))
+    b.set_ylabel(T(r"held-out $\log a_{xx}$, demeaned"))
+    b.set_title("(b) " + T(r"Within-stratum imbalance transfer (Spearman") + f" {rho_demeaned:.2f}" + T(r", weak)"))
     b.legend(loc="upper left", fontsize=8); despine(b)
 
-    fig.suptitle(r"Tick-mechanics control: imbalance still moves $a_{xx}$ within fixed spread-in-ticks "
-                 r"(panel a), but its shape transfers only weakly out of sample (panel b)", y=1.01)
+    fig.suptitle(T(r"Tick-mechanics control: imbalance still moves $a_{xx}$ within fixed spread-in-ticks "
+                   r"(panel a), but its shape transfers only weakly out of sample (panel b)"), y=1.01)
     finish(fig, OUTF / "fig_tick_control.png")
     print("[tick-control] wrote fig_tick_control.png, sde_tick_control.csv, sde_tick_control_summary.csv")
 

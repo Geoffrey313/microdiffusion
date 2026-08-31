@@ -29,7 +29,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common.paths import load_config, CLEAN_DIR, FIG_DIR
 from common.grid import N_I, M_S, cell_ids
-from common.plot_style import finish, setup_mpl, despine, INK, ACCENT, WARN, MUTED
+from common.plot_style import finish, setup_mpl, despine, INK, ACCENT, WARN, MUTED, T
 
 OUTF = FIG_DIR
 OUTF.mkdir(parents=True, exist_ok=True)
@@ -399,7 +399,7 @@ def main():
     # --- figure ---
     plt = setup_mpl()
 
-    labels = [r"Calm$\to$Stress", r"Stress$\to$Calm", r"Adjacent\n(baseline)"]
+    labels = [T(r"Calm$\to$Stress"), T(r"Stress$\to$Calm"), T(r"Adjacent\n(baseline)")]
     rhos  = [res_A["rho"],  res_B["rho"],  res_C["rho"]]
     gains = [res_A["gain"], res_B["gain"], res_C["gain"]]
     colors = [ACCENT, WARN, MUTED]
@@ -410,11 +410,11 @@ def main():
     # Panel (a): surface rank correlation
     bars0 = ax0.bar(x, rhos, color=colors, width=0.55, edgecolor=INK, linewidth=0.6)
     ax0.axhline(res_C["rho"], color=INK, ls="--", lw=1.0,
-                label=rf"Adjacent baseline $\rho={res_C['rho']:.2f}$")
+                label=T(r"Adjacent baseline $\rho=") + rf"{res_C['rho']:.2f}$")
     ax0.set_xticks(x)
     ax0.set_xticklabels(labels, fontsize=8)
-    ax0.set_ylabel(r"Spearman $\rho$: train $a_{xx}$ vs test $a_{xx}$")
-    ax0.set_title(r"(a) $a_{xx}(I,S)$ surface transfer across regimes")
+    ax0.set_ylabel(T(r"Spearman $\rho$: train $a_{xx}$ vs test $a_{xx}$"))
+    ax0.set_title("(a) " + T(r"$a_{xx}(I,S)$ surface transfer across regimes"))
     ax0.set_ylim(0, 1)
     for bar, v in zip(bars0, rhos):
         ax0.text(bar.get_x() + bar.get_width() / 2, v + 0.02,
@@ -425,11 +425,11 @@ def main():
     bars1 = ax1.bar(x, gains, color=colors, width=0.55, edgecolor=INK, linewidth=0.6)
     ax1.axhline(0, color=INK, ls="-", lw=0.7, alpha=0.4)
     ax1.axhline(res_C["gain"], color=INK, ls="--", lw=1.0,
-                label=rf"Adjacent baseline gain$={res_C['gain']:+.3f}$")
+                label=T(r"Adjacent baseline gain$=") + rf"{res_C['gain']:+.3f}$")
     ax1.set_xticks(x)
     ax1.set_xticklabels(labels, fontsize=8)
-    ax1.set_ylabel(r"Mean OOS log-likelihood gain (nats/obs), GH over Gaussian")
-    ax1.set_title(r"(b) GH tail law: OOS gain across regimes")
+    ax1.set_ylabel(T(r"Mean OOS log-likelihood gain (nats/obs), GH over Gaussian"))
+    ax1.set_title("(b) " + T(r"GH tail law: OOS gain across regimes"))
     for bar, v in zip(bars1, gains):
         ypos = v + 0.0005 if v >= 0 else v - 0.0015
         ax1.text(bar.get_x() + bar.get_width() / 2, ypos,
@@ -437,8 +437,8 @@ def main():
     ax1.legend(fontsize=7); despine(ax1)
 
     fig.suptitle(
-        r"Cross-regime transfer of $a_{xx}(I,S)$ surface and GH tail law "
-        r"(calm/stress split by cross-instrument median $|\Delta x|$ per trading day)",
+        T(r"Cross-regime transfer of $a_{xx}(I,S)$ surface and GH tail law "
+          r"(calm/stress split by cross-instrument median $|\Delta x|$ per trading day)"),
         y=1.02
     )
     finish(fig, OUTF / "fig_regime_transfer.png")

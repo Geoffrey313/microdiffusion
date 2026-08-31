@@ -25,7 +25,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common.paths import load_config, CLEAN_DIR, DIAG_DIR
 from common.grid import N_I, M_S, cell_ids
-from common.plot_style import WARN, MUTED, POS, finish, setup_mpl, despine
+from common.plot_style import WARN, MUTED, POS, finish, setup_mpl, despine, T
 
 TRAIN_FRAC = 0.60
 MIN_CELL = 50
@@ -144,18 +144,18 @@ def main():
     plt = setup_mpl()
     fig, ax = plt.subplots(1, 2, figsize=(13, 5.2))
     for axi, r, src, tgt in ((ax[0], rAB, "A", "B"), (ax[1], rBA, "B", "A")):
-        axi.plot(r["ks"], r["emp"], "-o", color=MUTED, ms=5, lw=1.7, label=rf"block {tgt} (empirical)")
+        axi.plot(r["ks"], r["emp"], "-o", color=MUTED, ms=5, lw=1.7, label=T(r"block") + f" {tgt} " + T(r"(empirical)"))
         axi.plot(r["ks"], r["gh"], "-s", color=POS, ms=4, lw=1.5,
-                 label=rf"GH fit on {src}, predicting {tgt}")
-        axi.plot(r["ks"], r["norm"], "--", color=WARN, lw=1.3, label=rf"Gaussian fit on {src}")
+                 label=T(r"GH fit on") + f" {src}, " + T(r"predicting") + f" {tgt}")
+        axi.plot(r["ks"], r["norm"], "--", color=WARN, lw=1.3, label=T(r"Gaussian fit on") + f" {src}")
         axi.set_yscale("log"); axi.set_ylim(1e-5, 1e-1)
-        axi.set_xlabel(r"threshold $k$ (local std units)")
-        axi.set_ylabel(r"$P(|z| > k)$ on the held-out block")
-        axi.set_title(rf"Fit on {src} $\rightarrow$ predict {tgt}:  "
-                      rf"$\Delta\overline{{\ell\ell}}_{{\mathrm{{GH-Gauss}}}}={r['dLL']:+.3f}$")
+        axi.set_xlabel(T(r"threshold $k$ (local std units)"))
+        axi.set_ylabel(T(r"$P(|z| > k)$ on the held-out block"))
+        axi.set_title(T(r"Fit on") + f" {src} " + r"$\rightarrow$ " + T(r"predict") + f" {tgt}:  "
+                      + rf"$\Delta\overline{{\ell\ell}}_{{\mathrm{{GH-Gauss}}}}={r['dLL']:+.3f}$")
         axi.legend(loc="upper right", fontsize=7.5); despine(axi)
-    fig.suptitle(r"Out-of-sample validation of the GH tail law: fit on one temporal block, predict the disjoint "
-                 r"block", y=1.01)
+    fig.suptitle(T("Out-of-sample validation of the GH tail law: fit on one temporal block, predict the disjoint "
+                   "block"), y=1.01)
     finish(fig, DIAG_DIR / "figures" / "sde_gh_oos.png")
     print("\n[gh-oos] wrote figures/sde_gh_oos.png and tables/sde_gh_oos.csv")
 

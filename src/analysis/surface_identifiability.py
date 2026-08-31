@@ -26,7 +26,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common.paths import load_config, CLEAN_DIR, DIAG_DIR
 from common.grid import N_I, M_S, cell_ids
-from common.plot_style import ACCENT, ACCENT_DARK, WARN, INK, finish, setup_mpl, despine
+from common.plot_style import ACCENT, ACCENT_DARK, WARN, INK, finish, setup_mpl, despine, T
 
 TRAIN_FRAC = 0.60
 MIN_CELL = 50
@@ -156,11 +156,11 @@ def main():
     a = ax[0]
     a.scatter(df["a_xx_train"] * 1e8, df["realised_var_test"] * 1e8, s=9, c=ACCENT, alpha=0.45, edgecolors="none")
     lim = [df["a_xx_train"].min() * 1e8, df["a_xx_train"].max() * 1e8]
-    a.plot(lim, lim, color=INK, ls="--", lw=1, label=r"$y=x$ (perfect)")
+    a.plot(lim, lim, color=INK, ls="--", lw=1, label=T(r"$y=x$ (perfect)"))
     a.set_xscale("log"); a.set_yscale("log")
-    a.set_xlabel(r"train scale $a_{xx}(c)$  [bps$^2$]")
-    a.set_ylabel(r"held-out realised variance $\mathbb{E}[(\Delta x)^2\,|\,c]$  [bps$^2$]")
-    a.set_title(rf"(A) The SIZE is the state: $a_{{xx}}$ tracks it (Spearman {sp_size:.2f})")
+    a.set_xlabel(T(r"train scale $a_{xx}(c)$  [bps$^2$]"))
+    a.set_ylabel(T(r"held-out realised variance $\mathbb{E}[(\Delta x)^2\,|\,c]$  [bps$^2$]"))
+    a.set_title("(A) " + T(r"The SIZE is the state: $a_{xx}$ tracks it (Spearman") + f" {sp_size:.2f})")
     a.legend(loc="upper left"); despine(a)
 
     # right: de-biased multiplier Ghat (denom = block A) vs an INDEPENDENT scale (block B) -> flat at 1
@@ -173,16 +173,16 @@ def main():
     for lo, hi in zip(xq[:-1], xq[1:]):
         m = (bx8 >= lo) & (bx8 < hi)
         med.append(np.median(gh[m]) if m.sum() else np.nan)
-    b.plot(xc, med, "-o", color=WARN, ms=4, lw=1.6, label=r"binned median $\widehat{G}$")
-    b.axhline(1.0, color=INK, ls="--", lw=1.2, label=r"$\widehat{G}=1$ (state-neutral)")
+    b.plot(xc, med, "-o", color=WARN, ms=4, lw=1.6, label=T(r"binned median $\widehat{G}$"))
+    b.axhline(1.0, color=INK, ls="--", lw=1.2, label=T(r"$\widehat{G}=1$ (state-neutral)"))
     b.set_xscale("log"); b.set_ylim(0, 3)
-    b.set_xlabel(r"independent scale $a_{xx}^{B}(c)$  [bps$^2$]  (disjoint block)")
-    b.set_ylabel(r"realised multiplier $\widehat{G}(c)$")
-    b.set_title(rf"(B) The leftover is state-neutral: $\widehat{{G}}\!\approx\!1$ (de-biased slope {slope_db:+.2f})")
+    b.set_xlabel(T(r"independent scale $a_{xx}^{B}(c)$  [bps$^2$]  (disjoint block)"))
+    b.set_ylabel(T(r"realised multiplier $\widehat{G}(c)$"))
+    b.set_title("(B) " + T(r"The leftover is state-neutral: $\widehat{{G}}\!\approx\!1$ (de-biased slope") + f" {slope_db:+.2f})")
     b.legend(loc="upper right", fontsize=7); despine(b)
 
-    fig.suptitle(r"Scale vs.\ shape are separate, identified objects: $a_{xx}(I,S)$ owns the state-dependence of "
-                 r"size; the multiplier $G$ is state-neutral", y=1.02)
+    fig.suptitle(T(r"Scale vs.\ shape are separate, identified objects: $a_{xx}(I,S)$ owns the state-dependence of "
+                   r"size; the multiplier $G$ is state-neutral"), y=1.02)
     finish(fig, DIAG_DIR / "figures" / "sde_identifiability.png")
     print("\n[ident] wrote figures/sde_identifiability.png and tables/sde_identifiability_summary.csv")
 

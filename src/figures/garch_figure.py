@@ -6,7 +6,7 @@ import pandas as pd
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common.paths import DIAG_DIR, FIG_DIR
-from common.plot_style import finish, setup_mpl, despine, INK, ACCENT, MUTED
+from common.plot_style import finish, setup_mpl, despine, INK, ACCENT, MUTED, T
 
 OUT = FIG_DIR
 OUT.mkdir(parents=True, exist_ok=True)
@@ -20,22 +20,22 @@ fig, ax = plt.subplots(1, 2, figsize=(13, 4.6))
 a = ax[0]
 lo = float(min(d.ll_garch.min(), d.ll_combo.min())) - 0.1
 hi = float(max(d.ll_garch.max(), d.ll_combo.max())) + 0.1
-a.plot([lo, hi], [lo, hi], color=INK, ls="--", lw=1, label=r"$y=x$ (no improvement)")
+a.plot([lo, hi], [lo, hi], color=INK, ls="--", lw=1, label=T(r"$y=x$ (no improvement)"))
 a.scatter(d.ll_garch, d.ll_combo, s=26, c=ACCENT, alpha=0.8, edgecolors="white", linewidths=0.4)
 a.set_xlim(lo, hi); a.set_ylim(lo, hi); a.set_aspect("equal")
-a.set_xlabel(r"GARCH out-of-sample log-likelihood / obs.")
-a.set_ylabel(r"combined (GARCH $\times$ book state) / obs.")
-a.set_title(rf"(a) Combined vs GARCH ({above}/{n} above the line)")
+a.set_xlabel(T(r"GARCH out-of-sample log-likelihood / obs."))
+a.set_ylabel(T(r"combined (GARCH $\times$ book state) / obs."))
+a.set_title("(a) " + T(r"Combined vs GARCH") + f" ({above}/{n} " + T(r"above the line") + ")")
 a.legend(loc="upper left"); despine(a)
 
 # (b) fitted weight on a_xx, one per instrument
 b = ax[1]
 b.hist(d.w_axx, bins=12, color=MUTED, edgecolor="white", linewidth=0.6)
-b.axvline(0, color=INK, ls="--", lw=1.2, label=r"$c_2=0$ (no weight on $a_{xx}$)")
-b.axvline(d.w_axx.mean(), color=ACCENT, ls="-", lw=1.6, label=rf"mean $c_2={d.w_axx.mean():.2f}$")
-b.set_xlabel(r"fitted combination weight on $a_{xx}$ ($c_2$)")
-b.set_ylabel(r"number of instruments")
-b.set_title(rf"(b) Weight on the book state ($ {pos_w}/{n}>0$)")
+b.axvline(0, color=INK, ls="--", lw=1.2, label=T(r"$c_2=0$ (no weight on $a_{xx}$)"))
+b.axvline(d.w_axx.mean(), color=ACCENT, ls="-", lw=1.6, label=T(r"mean") + rf" $c_2={d.w_axx.mean():.2f}$")
+b.set_xlabel(T(r"fitted combination weight on $a_{xx}$ ($c_2$)"))
+b.set_ylabel(T(r"number of instruments"))
+b.set_title("(b) " + T(r"Weight on the book state") + rf" ($ {pos_w}/{n}>0$)")
 b.legend(loc="upper right", fontsize=8); despine(b)
 
 finish(fig, OUT / "fig_garch_compare.png")

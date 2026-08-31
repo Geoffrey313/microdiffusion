@@ -33,7 +33,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common.paths import load_config, CLEAN_DIR, FIG_DIR
 from common.grid import N_I, M_S, cell_ids
-from common.plot_style import finish, setup_mpl, despine, INK, ACCENT, ACCENT_DARK, MUTED
+from common.plot_style import finish, setup_mpl, despine, INK, ACCENT, ACCENT_DARK, MUTED, T
 
 OUTF = FIG_DIR
 OUTF.mkdir(parents=True, exist_ok=True)
@@ -314,23 +314,23 @@ def main():
         ax.legend(fontsize=7)
         despine(ax)
 
-    ax0.set_xlabel(r"Christoffersen $p_{\mathrm{ind}}$: Flat Gaussian (no conditioning)")
-    ax0.set_ylabel(r"Christoffersen $p_{\mathrm{ind}}$: State Gaussian $a_{xx}(I,S)$")
-    ax0.set_title(r"(a) Book-state scale effect on violation clustering")
-    ax0.text(0.05, 0.92, "above diagonal = state scale\nreduces clustering",
+    ax0.set_xlabel(T(r"Christoffersen $p_{\mathrm{ind}}$: Flat Gaussian (no conditioning)"))
+    ax0.set_ylabel(T(r"Christoffersen $p_{\mathrm{ind}}$: State Gaussian $a_{xx}(I,S)$"))
+    ax0.set_title("(a) " + T(r"Book-state scale effect on violation clustering"))
+    ax0.text(0.05, 0.92, T("above diagonal = state scale\nreduces clustering"),
              transform=ax0.transAxes, fontsize=7, color=INK,
              bbox=dict(boxstyle="round,pad=0.3", fc="white", ec=INK, lw=0.5, alpha=0.85))
 
-    ax1.set_xlabel(r"Christoffersen $p_{\mathrm{ind}}$: State Gaussian")
-    ax1.set_ylabel(r"Christoffersen $p_{\mathrm{ind}}$: State GH $a_{xx}(I,S)$")
-    ax1.set_title(r"(b) Tail-law effect on violation clustering")
-    ax1.text(0.05, 0.92, "above diagonal = GH tail\nreduces clustering",
+    ax1.set_xlabel(T(r"Christoffersen $p_{\mathrm{ind}}$: State Gaussian"))
+    ax1.set_ylabel(T(r"Christoffersen $p_{\mathrm{ind}}$: State GH $a_{xx}(I,S)$"))
+    ax1.set_title("(b) " + T(r"Tail-law effect on violation clustering"))
+    ax1.text(0.05, 0.92, T("above diagonal = GH tail\nreduces clustering"),
              transform=ax1.transAxes, fontsize=7, color=INK,
              bbox=dict(boxstyle="round,pad=0.3", fc="white", ec=INK, lw=0.5, alpha=0.85))
 
     fig.suptitle(
-        r"Violation clustering: Christoffersen $p_{\mathrm{ind}}$ across three VaR models "
-        r"(higher = less clustering evidence). Points above diagonal = improvement.",
+        T(r"Violation clustering: Christoffersen $p_{\mathrm{ind}}$ across three VaR models "
+          r"(higher = less clustering evidence). Points above diagonal = improvement."),
         y=1.02
     )
     finish(fig, OUTF / "fig_clustering.png")

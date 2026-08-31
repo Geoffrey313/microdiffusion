@@ -31,7 +31,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common.paths import load_config, CLEAN_DIR, DIAG_DIR
 from common.grid import N_I, M_S, cell_ids
-from common.plot_style import ACCENT, ACCENT_DARK, WARN, MUTED, INK, POS, finish, setup_mpl, despine
+from common.plot_style import ACCENT, ACCENT_DARK, WARN, MUTED, INK, POS, finish, setup_mpl, despine, T
 
 TRAIN_FRAC = 0.60
 MIN_CELL = 50
@@ -196,29 +196,29 @@ def main():
     a = ax[0]; lo, hi = -8 * sd, 8 * sd; gridp = np.linspace(lo, hi, 400)
     binp = np.linspace(lo, hi, 160)
     a.hist(z[(z > lo) & (z < hi)], bins=binp, density=True, histtype="step", color=MUTED, lw=1.5,
-           label=r"data $z$")
+           label=T(r"data $z$"))
     for L in laws:
-        a.plot(gridp, L["pdf"](gridp), color=palette[L["name"]], ls=styles[L["name"]], lw=1.4, label=L["name"])
+        a.plot(gridp, L["pdf"](gridp), color=palette[L["name"]], ls=styles[L["name"]], lw=1.4, label=T(L["name"]))
     a.set_yscale("log"); a.set_ylim(1e-5, 2)
-    a.set_xlabel(r"standardised increment $z=(\Delta x-b_x)/\sqrt{a_{xx}}$")
-    a.set_ylabel(r"density (log scale)")
-    a.set_title(r"Panel A$'$: shape of the kick --- Gaussian vs heavy-tailed mixtures")
+    a.set_xlabel(T(r"standardised increment $z=(\Delta x-b_x)/\sqrt{a_{xx}}$"))
+    a.set_ylabel(T(r"density (log scale)"))
+    a.set_title(T(r"Panel A$'$: shape of the kick --- Gaussian vs heavy-tailed mixtures"))
     a.legend(loc="lower center", ncol=2, fontsize=7); despine(a)
 
     d = ax[1]
-    d.plot(ks, emp, "-o", color=MUTED, ms=4, lw=1.6, label=r"data")
+    d.plot(ks, emp, "-o", color=MUTED, ms=4, lw=1.6, label=T(r"data"))
     for L in laws:
         d.plot(ks, [L["sf"](k) for k in ks], ls=styles[L["name"]], color=palette[L["name"]], lw=1.4,
-               marker="s", ms=3, label=L["name"])
+               marker="s", ms=3, label=T(L["name"]))
     d.set_yscale("log"); d.set_ylim(1e-7, 1)
-    d.set_xlabel(r"threshold $k$ (in units of $\sqrt{a_{xx}}$)")
+    d.set_xlabel(T(r"threshold $k$ (in units of $\sqrt{a_{xx}}$)"))
     d.set_ylabel(r"$P(|\,z\,| > k)$")
-    d.set_title(r"Panel D$'$: tail exceedance --- which kick reproduces the jumps?")
+    d.set_title(T(r"Panel D$'$: tail exceedance --- which kick reproduces the jumps?"))
     d.legend(loc="upper right", fontsize=7); despine(d)
 
-    fig.suptitle(r"Heavy-tailed innovation $\varepsilon=\sqrt{G}\,Z$ with $Z\sim N(0,1)$ and $G$ the random "
-                 r"variance ($\mathbb{E}[G]{=}1$): Student-$t$ (Inv.-Gamma $G$) and Gen.-Hyperbolic "
-                 r"(GIG $G$) vs.\ Gaussian", y=1.02)
+    fig.suptitle(T(r"Heavy-tailed innovation $\varepsilon=\sqrt{G}\,Z$ with $Z\sim N(0,1)$ and $G$ the random "
+                   r"variance ($\mathbb{E}[G]{=}1$): Student-$t$ (Inv.-Gamma $G$) and Gen.-Hyperbolic "
+                   r"(GIG $G$) vs.\ Gaussian"), y=1.02)
     finish(fig, DIAG_DIR / "figures" / "sde_heavytail.png")
     print("\n[heavytail] wrote figures/sde_heavytail.png and tables/sde_heavytail_summary.csv")
 

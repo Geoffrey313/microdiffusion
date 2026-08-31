@@ -19,7 +19,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common.paths import load_config, CLEAN_DIR, FIG_DIR
 from common.grid import N_I, M_S, cell_ids
-from common.plot_style import finish, setup_mpl
+from common.plot_style import finish, setup_mpl, T
 
 OUTF = FIG_DIR; OUTF.mkdir(parents=True, exist_ok=True)
 TRAIN_FRAC = 0.60
@@ -74,15 +74,15 @@ def main():
 
     plt = setup_mpl()
     fig, ax = plt.subplots(1, 2, figsize=(11, 6))
-    s_labels = ["tight\n(S tercile 1)", "mid\n(S tercile 2)", "wide\n(S tercile 3)"]
+    s_labels = [T("tight\n(S tercile 1)"), T("mid\n(S tercile 2)"), T("wide\n(S tercile 3)")]
     i_labels = [f"{e:+.1f}" for e in np.linspace(-0.9, 0.9, N_I)]
 
     a = ax[0]
     im = a.imshow(np.log10(surf), aspect="auto", origin="lower", cmap="viridis")
     a.set_xticks(range(M_S)); a.set_xticklabels(s_labels, fontsize=8)
     a.set_yticks(range(N_I)); a.set_yticklabels(i_labels, fontsize=8)
-    a.set_ylabel(r"best-level imbalance $I$"); a.set_xlabel(r"relative spread $S$")
-    a.set_title(r"(a) Diffusion surface $\log_{10}\,a_{xx}/\mathrm{median}$ (pooled)")
+    a.set_ylabel(T(r"best-level imbalance $I$")); a.set_xlabel(T(r"relative spread $S$"))
+    a.set_title("(a) " + T(r"Diffusion surface $\log_{10}\,a_{xx}/\mathrm{median}$ (pooled)"))
     fig.colorbar(im, ax=a, fraction=0.046, pad=0.04)
     for ib in range(N_I):
         for sb in range(M_S):
@@ -93,8 +93,8 @@ def main():
     im2 = b.imshow(np.log10(cnt + 1), aspect="auto", origin="lower", cmap="magma")
     b.set_xticks(range(M_S)); b.set_xticklabels(s_labels, fontsize=8)
     b.set_yticks(range(N_I)); b.set_yticklabels(i_labels, fontsize=8)
-    b.set_xlabel(r"relative spread $S$")
-    b.set_title(r"(b) Total observation count per cell")
+    b.set_xlabel(T(r"relative spread $S$"))
+    b.set_title("(b) " + T(r"Total observation count per cell"))
     fig.colorbar(im2, ax=b, fraction=0.046, pad=0.04)
     for ib in range(N_I):
         for sb in range(M_S):
@@ -102,8 +102,8 @@ def main():
             b.text(sb, ib, f"{v//1000}k" if v >= 1000 else f"{v}", ha="center", va="center",
                    color="w" if cnt[ib, sb] < cnt.max() * 0.5 else "k", fontsize=6.5)
 
-    fig.suptitle(r"The diffusion surface as a heatmap, with per-cell occupancy: well-populated cells "
-                 r"carry the transferable structure", y=1.00)
+    fig.suptitle(T("The diffusion surface as a heatmap, with per-cell occupancy: well-populated cells "
+                   "carry the transferable structure"), y=1.00)
     finish(fig, OUTF / "fig_axx_heatmap_counts.png")
     print("[cellcounts] wrote fig_axx_heatmap_counts.png")
 

@@ -24,7 +24,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common.paths import load_config, CLEAN_DIR, DIAG_DIR
 from common.grid import N_I, M_S, cell_ids
-from common.plot_style import ACCENT, ACCENT_DARK, WARN, MUTED, POS, finish, setup_mpl, despine
+from common.plot_style import ACCENT, ACCENT_DARK, WARN, MUTED, POS, finish, setup_mpl, despine, T
 
 TRAIN_FRAC = 0.60
 MIN_CELL = 50
@@ -149,31 +149,31 @@ def main():
 
     # Fig 1: tail panel with GH simulation
     fig, ax = plt.subplots(figsize=(7.2, 5))
-    ax.plot(ks, emp, "-o", color=MUTED, ms=5, lw=1.8, label=r"data (held-out)")
-    ax.plot(ks, t_gh, "-s", color=POS, ms=4, lw=1.5, label=r"GH-driven SDE simulation")
-    ax.plot(ks, t_n, "-^", color=ACCENT_DARK, ms=4, lw=1.5, label=r"Gaussian SDE simulation")
-    ax.plot(ks, t_norm, "--", color=WARN, lw=1.2, label=r"$N(0,1)$ reference")
+    ax.plot(ks, emp, "-o", color=MUTED, ms=5, lw=1.8, label=T(r"data (held-out)"))
+    ax.plot(ks, t_gh, "-s", color=POS, ms=4, lw=1.5, label=T(r"GH-driven SDE simulation"))
+    ax.plot(ks, t_n, "-^", color=ACCENT_DARK, ms=4, lw=1.5, label=T(r"Gaussian SDE simulation"))
+    ax.plot(ks, t_norm, "--", color=WARN, lw=1.2, label=T(r"$N(0,1)$ reference"))
     ax.set_yscale("log"); ax.set_ylim(1e-7, 1)
-    ax.set_xlabel(r"threshold $k$ (in units of $\sqrt{a_{xx}}$)")
+    ax.set_xlabel(T(r"threshold $k$ (in units of $\sqrt{a_{xx}}$)"))
     ax.set_ylabel(r"$P(|\Delta x|/\sqrt{a_{xx}} > k)$")
-    ax.set_title(r"Folding the GH kick into the SDE: simulated paths now carry the jumps")
+    ax.set_title(T(r"Folding the GH kick into the SDE: simulated paths now carry the jumps"))
     ax.legend(loc="upper right"); despine(ax)
     finish(fig, DIAG_DIR / "figures" / "sde_ghsim_tail.png")
 
     # Fig 2: is the tail knob Var(G) state-dependent?
     fig2, (axa, axb) = plt.subplots(1, 2, figsize=(13, 4.6))
     axa.bar([0, 1, 2], VG_S, color=[MUTED, ACCENT, ACCENT_DARK], width=0.6)
-    axa.set_xticks([0, 1, 2]); axa.set_xticklabels([r"tight $S$", r"mid $S$", r"wide $S$"])
-    axa.set_ylabel(r"$\mathrm{Var}(G)=\mathrm{exkurt}(z)/3$ (trimmed)")
-    axa.set_title(r"(A) Tail knob by spread tercile")
+    axa.set_xticks([0, 1, 2]); axa.set_xticklabels([T(r"tight $S$"), T(r"mid $S$"), T(r"wide $S$")])
+    axa.set_ylabel(T(r"$\mathrm{Var}(G)=\mathrm{exkurt}(z)/3$ (trimmed)"))
+    axa.set_title("(A) " + T(r"Tail knob by spread tercile"))
     for i, v in enumerate(VG_S):
         axa.text(i, v, f"{v:.1f}", ha="center", va="bottom"); despine(axa)
     axb.plot(imb_centers, VG_I, "-o", color=ACCENT_DARK, ms=5, lw=1.6)
-    axb.set_xlabel(r"order-book imbalance $I$ (bin midpoint)")
-    axb.set_ylabel(r"$\mathrm{Var}(G)$ (trimmed)")
-    axb.set_title(rf"(B) Tail knob by imbalance (Spearman$(|I|,\mathrm{{Var}}\,G)={sp_I:+.2f}$)")
+    axb.set_xlabel(T(r"order-book imbalance $I$ (bin midpoint)"))
+    axb.set_ylabel(T(r"$\mathrm{Var}(G)$ (trimmed)"))
+    axb.set_title("(B) " + T(r"Tail knob by imbalance (Spearman$(|I|,\mathrm{{Var}}\,G)=") + rf"{sp_I:+.2f}$)")
     despine(axb)
-    fig2.suptitle(r"Is the fat-tail thickness $\mathrm{Var}(G)$ itself a function of the book state $(I,S)$?",
+    fig2.suptitle(T(r"Is the fat-tail thickness $\mathrm{Var}(G)$ itself a function of the book state $(I,S)$?"),
                   y=1.0)
     finish(fig2, DIAG_DIR / "figures" / "sde_tailknob_state.png")
     print("\n[ghsim] wrote figures/sde_ghsim_tail.png, figures/sde_tailknob_state.png, tables/sde_ghsim_summary.csv")

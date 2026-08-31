@@ -34,7 +34,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common.paths import load_config, CLEAN_DIR, DIAG_DIR, FIG_DIR
 from common.grid import N_I, M_S, cell_ids
-from common.plot_style import finish, setup_mpl, despine, INK, ACCENT, ACCENT_DARK, MUTED, POS
+from common.plot_style import finish, setup_mpl, despine, INK, ACCENT, ACCENT_DARK, MUTED, POS, T
 
 OUTT = DIAG_DIR / "tables"; OUTT.mkdir(parents=True, exist_ok=True)
 OUTF = FIG_DIR; OUTF.mkdir(parents=True, exist_ok=True)
@@ -181,24 +181,24 @@ def main():
     a = ax[0]
     a.scatter(df.gain_own, df.gain_borrowed, s=22, c=ACCENT, edgecolors=INK, lw=0.4)
     lim = [0, max(df.gain_own.max(), df.gain_borrowed.max()) * 1.05]
-    a.plot(lim, lim, color=INK, ls="--", lw=1, label=r"borrowed $=$ own")
-    a.set_xlabel(r"own-fit GH gain over Gaussian (per obs)")
-    a.set_ylabel(r"borrowed GH gain (fit on other instruments)")
-    a.set_title(r"(a) The tail law transfers across instruments")
+    a.plot(lim, lim, color=INK, ls="--", lw=1, label=T(r"borrowed $=$ own"))
+    a.set_xlabel(T(r"own-fit GH gain over Gaussian (per obs)"))
+    a.set_ylabel(T(r"borrowed GH gain (fit on other instruments)"))
+    a.set_title("(a) " + T(r"The tail law transfers across instruments"))
     a.legend(loc="upper left", fontsize=9); despine(a)
 
     b = ax[1]
     tdf = pd.DataFrame(trows)
     xpos = np.arange(len(tdf))
     b.bar(xpos, tdf.gh_p, color=[MUTED, ACCENT, ACCENT_DARK], width=0.6)
-    b.axhline(-0.5, color=POS, lw=1.3, ls="--", label=r"NIG corner $p=-0.5$")
-    b.set_xticks(xpos); b.set_xticklabels([t.split()[0] for t in tdf.tercile])
-    b.set_ylabel(r"fitted GH shape index $p$")
-    b.set_title(r"(b) Tail shape is nearly constant across liquidity")
+    b.axhline(-0.5, color=POS, lw=1.3, ls="--", label=T(r"NIG corner $p=-0.5$"))
+    b.set_xticks(xpos); b.set_xticklabels([T(t.split()[0]) for t in tdf.tercile])
+    b.set_ylabel(T(r"fitted GH shape index $p$"))
+    b.set_title("(b) " + T(r"Tail shape is nearly constant across liquidity"))
     b.legend(loc="upper right", fontsize=9); despine(b)
 
-    fig.suptitle(r"The heavy-tailed innovation law is instrument-neutral: it transfers leave-one-out and its "
-                 r"shape barely moves across liquidity", y=1.01)
+    fig.suptitle(T("The heavy-tailed innovation law is instrument-neutral: it transfers leave-one-out and its "
+                   "shape barely moves across liquidity"), y=1.01)
     finish(fig, OUTF / "fig_gh_loio.png")
     print("[gh-loio] wrote fig_gh_loio.png, sde_gh_loio.csv, sde_gh_loio_tercile.csv")
 

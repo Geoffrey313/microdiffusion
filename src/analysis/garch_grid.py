@@ -24,7 +24,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common.paths import load_config, CLEAN_DIR, DIAG_DIR, FIG_DIR
 from common.grid import N_I, M_S, cell_ids
-from common.plot_style import finish, setup_mpl, despine, INK, MUTED, ACCENT, ACCENT_DARK
+from common.plot_style import finish, setup_mpl, despine, INK, MUTED, ACCENT, ACCENT_DARK, T
 
 TRAIN_FRAC = 0.60
 MIN_CELL = 50
@@ -212,26 +212,26 @@ def main():
              "Combined + GH": (ACCENT_DARK, "-", "D")}
     fig, ax = plt.subplots(1, 2, figsize=(13, 5.0))
     a = ax[0]
-    a.plot([0.5, 1], [0.5, 1], color="0.6", lw=1, ls="-", zorder=0, label=r"perfect calibration")
+    a.plot([0.5, 1], [0.5, 1], color="0.6", lw=1, ls="-", zorder=0, label=T(r"perfect calibration"))
     for _, _, lab in PAIRS:
         c, ls, mk = style[lab]
-        a.plot(nominal, cov[lab], ls=ls, marker=mk, ms=4, color=c, lw=1.5, label=lab)
-    a.set_xlabel(r"nominal coverage of the predictive interval")
-    a.set_ylabel(r"empirical coverage (held-out)")
-    a.set_title(r"(a) Are the predictive intervals calibrated?")
+        a.plot(nominal, cov[lab], ls=ls, marker=mk, ms=4, color=c, lw=1.5, label=T(lab))
+    a.set_xlabel(T(r"nominal coverage of the predictive interval"))
+    a.set_ylabel(T(r"empirical coverage (held-out)"))
+    a.set_title("(a) " + T(r"Are the predictive intervals calibrated?"))
     a.set_xlim(0.48, 1.005); a.set_ylim(0.48, 1.005); a.legend(loc="upper left", fontsize=7.5); despine(a)
     b = ax[1]
-    b.axhline(1.0, color="0.6", lw=1, label=r"perfect (ratio $=1$)")
+    b.axhline(1.0, color="0.6", lw=1, label=T(r"perfect (ratio $=1$)"))
     for _, _, lab in PAIRS:
         c, ls, mk = style[lab]
-        b.plot(betas * 100, tail[lab], ls=ls, marker=mk, ms=4, color=c, lw=1.5, label=lab)
+        b.plot(betas * 100, tail[lab], ls=ls, marker=mk, ms=4, color=c, lw=1.5, label=T(lab))
     b.set_xscale("log"); b.set_yscale("log")
-    b.set_xlabel(r"nominal two-sided tail level (\%)")
-    b.set_ylabel(r"observed / nominal tail exceedance")
-    b.set_title(r"(b) Tail-risk calibration (lower tail levels $\rightarrow$)")
+    b.set_xlabel(T(r"nominal two-sided tail level (\%)"))
+    b.set_ylabel(T(r"observed / nominal tail exceedance"))
+    b.set_title("(b) " + T(r"Tail-risk calibration (lower tail levels $\rightarrow$)"))
     b.invert_xaxis(); b.legend(loc="upper right", fontsize=7.5); despine(b)
-    fig.suptitle(r"Out-of-sample predictive calibration: heavy-tailed innovations improve tail-risk "
-                 r"calibration", y=1.01)
+    fig.suptitle(T("Out-of-sample predictive calibration: heavy-tailed innovations improve tail-risk "
+                   "calibration"), y=1.01)
     OUT = FIG_DIR
     OUT.mkdir(parents=True, exist_ok=True)
     finish(fig, OUT / "fig_garch_calibration.png")

@@ -38,7 +38,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common.paths import load_config, CLEAN_DIR, DIAG_DIR, FIG_DIR
 from common.grid import N_I, M_S, cell_ids
-from common.plot_style import finish, setup_mpl, despine, INK, ACCENT, ACCENT_DARK, MUTED, POS, WARN
+from common.plot_style import finish, setup_mpl, despine, INK, ACCENT, ACCENT_DARK, MUTED, POS, WARN, T
 
 OUTT = DIAG_DIR / "tables"; OUTT.mkdir(parents=True, exist_ok=True)
 OUTF = FIG_DIR; OUTF.mkdir(parents=True, exist_ok=True)
@@ -230,10 +230,10 @@ def main():
     a = ax[0]
     a.hist(zero_share_cells, bins=np.linspace(0, 1, 26), color=ACCENT, alpha=0.8, edgecolor=INK, lw=0.4)
     a.axvline(np.median(zero_share_cells), color=WARN, lw=1.5, ls="--",
-              label=rf"median ${np.median(zero_share_cells):.2f}$")
-    a.set_xlabel(r"held-out zero-move share $1-q(I,S)$ per cell")
-    a.set_ylabel(r"number of cells")
-    a.set_title(r"(a) A large fraction of updates leave the mid unchanged")
+              label=T(r"median") + rf" ${np.median(zero_share_cells):.2f}$")
+    a.set_xlabel(T(r"held-out zero-move share $1-q(I,S)$ per cell"))
+    a.set_ylabel(T(r"number of cells"))
+    a.set_title("(a) " + T(r"A large fraction of updates leave the mid unchanged"))
     a.legend(loc="upper right", fontsize=9); despine(a)
 
     b = ax[1]
@@ -243,18 +243,18 @@ def main():
     emp_plus = np.array([np.mean(np.abs(zpB) > k) for k in ks])
     gh_plus = np.array([gh_p.sf(k) + gh_p.cdf(-k) for k in ks])
     gauss_plus = np.array([2 * stats.norm.sf(k / sd_p) for k in ks])
-    b.plot(ks, emp_full, "-o", color=MUTED, ms=4, lw=1.4, label=r"data $z_{\rm full}$ (with zeros)")
-    b.plot(ks, emp_plus, "-o", color=ACCENT_DARK, ms=5, lw=1.8, label=r"data $z_{+}$ (nonzero, correct scale)")
-    b.plot(ks, gh_plus, "-s", color=POS, ms=4, lw=1.5, label=r"GH fit on $z_{+}$ (OOS)")
-    b.plot(ks, gauss_plus, "--", color=WARN, lw=1.3, label=r"Gaussian fit on $z_{+}$")
+    b.plot(ks, emp_full, "-o", color=MUTED, ms=4, lw=1.4, label=T(r"data $z_{\rm full}$ (with zeros)"))
+    b.plot(ks, emp_plus, "-o", color=ACCENT_DARK, ms=5, lw=1.8, label=T(r"data $z_{+}$ (nonzero, correct scale)"))
+    b.plot(ks, gh_plus, "-s", color=POS, ms=4, lw=1.5, label=T(r"GH fit on $z_{+}$ (OOS)"))
+    b.plot(ks, gauss_plus, "--", color=WARN, lw=1.3, label=T(r"Gaussian fit on $z_{+}$"))
     b.set_yscale("log"); b.set_ylim(1e-5, 1)
-    b.set_xlabel(r"threshold $k$ (local std units)")
-    b.set_ylabel(r"$P(|z| > k)$ on held-out block")
-    b.set_title(rf"(b) Heavy tail persists on nonzero moves (exkurt $={plus_kurt:.0f}$)")
+    b.set_xlabel(T(r"threshold $k$ (local std units)"))
+    b.set_ylabel(T(r"$P(|z| > k)$ on held-out block"))
+    b.set_title("(b) " + T(r"Heavy tail persists on nonzero moves (exkurt $=") + rf"{plus_kurt:.0f}$)")
     b.legend(loc="upper right", fontsize=8); despine(b)
 
-    fig.suptitle(r"Zero-move decomposition: the heavy tail is not a zero-inflation artifact --- it survives "
-                 r"correct conditional-on-move scaling", y=1.01)
+    fig.suptitle(T("Zero-move decomposition: the heavy tail is not a zero-inflation artifact --- it survives "
+                   "correct conditional-on-move scaling"), y=1.01)
     finish(fig, OUTF / "fig_zeromove.png")
     print("[zeromove] wrote fig_zeromove.png, sde_zeromove.csv, sde_zeromove_cells.csv")
 

@@ -27,7 +27,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common.paths import load_config, CLEAN_DIR, DIAG_DIR, FIG_DIR
 from common.grid import N_I, M_S, cell_ids
-from common.plot_style import finish, setup_mpl, despine, INK, ACCENT, ACCENT_DARK, MUTED
+from common.plot_style import finish, setup_mpl, despine, INK, ACCENT, ACCENT_DARK, MUTED, T
 
 OUTF = FIG_DIR; OUTF.mkdir(parents=True, exist_ok=True)
 NCELL = N_I * M_S
@@ -144,9 +144,9 @@ def main():
     lim = [np.nanmin(pair_t), np.nanmax(pair_t)]
     a.plot(lim, lim, color=INK, ls="--", lw=1, label=r"$y=x$")
     a.set_xscale("log"); a.set_yscale("log")
-    a.set_xlabel(r"transferred $a_{xx}$ from other instruments  [bps$^2$]")
-    a.set_ylabel(r"realised held-out variance of the target  [bps$^2$]")
-    a.set_title(rf"(a) The surface transfers across instruments (Spearman {sp:.2f})")
+    a.set_xlabel(T(r"transferred $a_{xx}$ from other instruments  [bps$^2$]"))
+    a.set_ylabel(T(r"realised held-out variance of the target  [bps$^2$]"))
+    a.set_title("(a) " + T(r"The surface transfers across instruments (Spearman") + f" {sp:.2f})")
     a.legend(loc="upper left"); despine(a)
 
     b = ax[1]
@@ -154,17 +154,17 @@ def main():
     gain_o = (df.ll_own - df.ll_const).to_numpy()
     means = [0.0, gain_t.mean(), gain_o.mean()]
     errs = [0.0, agg(gain_t)[1], agg(gain_o)[1]]
-    labels = ["one-scalar floor\n(constant variance)", "transferred $a_{xx}$\n(other instruments)",
-              "own $a_{xx}$\n(this instrument)"]
+    labels = [T("one-scalar floor\n(constant variance)"), T("transferred $a_{xx}$\n(other instruments)"),
+              T("own $a_{xx}$\n(this instrument)")]
     cols = [MUTED, ACCENT, ACCENT_DARK]
     b.bar(range(3), means, yerr=errs, color=cols, width=0.6, capsize=3)
     b.axhline(0, color=INK, lw=0.8)
     b.set_xticks(range(3)); b.set_xticklabels(labels, fontsize=8)
-    b.set_ylabel(r"OOS log-likelihood gain over the one-scalar floor")
-    b.set_title(r"(b) A surface from other names captures the state structure")
+    b.set_ylabel(T(r"OOS log-likelihood gain over the one-scalar floor"))
+    b.set_title("(b) " + T(r"A surface from other names captures the state structure"))
     despine(b)
-    fig.suptitle(r"The diffusion surface is cross-sectionally portable: a shape learned from other "
-                 r"instruments forecasts the target's state-dependent variance", y=1.01)
+    fig.suptitle(T("The diffusion surface is cross-sectionally portable: a shape learned from other "
+                   "instruments forecasts the target's state-dependent variance"), y=1.01)
     finish(fig, OUTF / "fig_transfer_coldstart.png")
     print("[transfer] wrote fig_transfer_coldstart.png and tables/sde_transfer_coldstart.csv")
 

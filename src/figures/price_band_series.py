@@ -26,7 +26,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common.paths import load_config, CLEAN_DIR, FIG_DIR
 from common.grid import N_I, M_S, cell_ids
-from common.plot_style import finish, setup_mpl, despine, INK, ACCENT, ACCENT_DARK, WARN, POS
+from common.plot_style import finish, setup_mpl, despine, INK, ACCENT, ACCENT_DARK, WARN, POS, T
 
 OUTF = FIG_DIR; OUTF.mkdir(parents=True, exist_ok=True)
 TRAIN_FRAC = 0.60
@@ -129,35 +129,36 @@ def main():
 
     def draw(ax, marklab=False):
         ax.fill_between(tt[m], iU[m], oU[m], color=WARN, alpha=0.35, lw=0,
-                        label=(r"GH heavy-tail extension (99\%)" if marklab else None))
+                        label=(T(r"GH heavy-tail extension (99\%)") if marklab else None))
         ax.fill_between(tt[m], oL[m], iL[m], color=WARN, alpha=0.35, lw=0)
         ax.fill_between(tt[m], iL[m], iU[m], color=ACCENT, alpha=0.32, lw=0,
-                        label=(r"$a_{xx}(I,S)$ scale, Gaussian (99\%)" if marklab else None))
+                        label=(T(r"$a_{xx}(I,S)$ scale, Gaussian (99\%)") if marklab else None))
         ax.plot(tt[m], np.exp(cL[m]), color=ACCENT_DARK, lw=0.8, ls="--",
-                label=(r"model one-step price estimate $x_t+b_x$" if marklab else None))
-        ax.plot(tt, P, color=INK, lw=0.8, label=(r"realised mid-price" if marklab else None))
+                label=(T(r"model one-step price estimate $x_t+b_x$") if marklab else None))
+        ax.plot(tt, P, color=INK, lw=0.8, label=(T(r"realised mid-price") if marklab else None))
 
     fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(13, 8.6))
     # (a) full session
     draw(ax0, marklab=True)
     ax0.axvspan(w0, w1, color="0.45", alpha=0.12, lw=0)
-    ax0.set_xlim(0, n); ax0.set_ylabel(r"mid-price")
-    ax0.set_title(rf"(a) Full held-out session ({sym}, {pth.parent.name}); shaded region $=$ zoom in panel (b)")
+    ax0.set_xlim(0, n); ax0.set_ylabel(T(r"mid-price"))
+    ax0.set_title("(a) " + T(r"Full held-out session (") + f"{sym}, {pth.parent.name}"
+                  + T(r"; shaded region $=$ zoom in panel (b)"))
     ax0.legend(loc="best", fontsize=8, ncol=2); despine(ax0)
     # (b) zoom
     draw(ax1)
     pin = [t for t in pierce if w0 <= t < w1]
     if pin:
         ax1.scatter(pin, P[pin], s=24, color=POS, zorder=5, edgecolors="white", linewidths=0.5,
-                    label=r"move beyond the Gaussian band")
+                    label=T(r"move beyond the Gaussian band"))
     lo = float(np.nanmin(np.concatenate([P[w0:w1], oL[w0:w1]])))
     hi = float(np.nanmax(np.concatenate([P[w0:w1], oU[w0:w1]])))
     pad = 0.12 * (hi - lo)
     ax1.set_xlim(w0, w1); ax1.set_ylim(lo - pad, hi + pad)
-    ax1.set_xlabel(r"event index within the held-out session"); ax1.set_ylabel(r"mid-price")
-    ax1.set_title(r"(b) Zoom: the band breathes with $a_{xx}(I,S)$ and is widened by the GH tail")
+    ax1.set_xlabel(T(r"event index within the held-out session")); ax1.set_ylabel(T(r"mid-price"))
+    ax1.set_title("(b) " + T(r"Zoom: the band breathes with $a_{xx}(I,S)$ and is widened by the GH tail"))
     ax1.legend(loc="upper left", fontsize=8); despine(ax1)
-    fig.suptitle(r"One-step-ahead predictive interval for the price from the state-dependent SDE", y=1.0)
+    fig.suptitle(T(r"One-step-ahead predictive interval for the price from the state-dependent SDE"), y=1.0)
     finish(fig, OUTF / "fig_price_band.png")
     print("[band] wrote manuscript/en/ssrn/figures/fig_price_band.png")
 
@@ -178,29 +179,29 @@ def main():
     figc, (axA, axB) = plt.subplots(1, 2, figsize=(13, 4.7))
     grid = np.linspace(-8, 8, 300); bins = np.linspace(-8, 8, 120)
     axA.hist(zt[np.abs(zt) < 8], bins=bins, density=True, histtype="step", color=INK, lw=1.4,
-             label=r"realised standardised returns")
-    axA.plot(grid, ghpdf(grid), color=ACCENT_DARK, lw=1.6, label=r"model: GH innovation")
-    axA.plot(grid, stats.norm.pdf(grid), color=WARN, lw=1.3, ls="--", label=r"Gaussian")
+             label=T(r"realised standardised returns"))
+    axA.plot(grid, ghpdf(grid), color=ACCENT_DARK, lw=1.6, label=T(r"model: GH innovation"))
+    axA.plot(grid, stats.norm.pdf(grid), color=WARN, lw=1.3, ls="--", label=T(r"Gaussian"))
     axA.set_yscale("log"); axA.set_ylim(1e-5, 1)
-    axA.set_xlabel(r"standardised one-step return $(\Delta x-b_x)/\sqrt{a_{xx}}$")
-    axA.set_ylabel(r"density (log scale)"); axA.set_title(r"(a) Return distribution: model vs realised")
+    axA.set_xlabel(T(r"standardised one-step return $(\Delta x-b_x)/\sqrt{a_{xx}}$"))
+    axA.set_ylabel(T(r"density (log scale)")); axA.set_title("(a) " + T(r"Return distribution: model vs realised"))
     axA.legend(loc="lower center", fontsize=8); despine(axA)
 
     lo = min(vm.min(), vr.min()); hi = max(vm.max(), vr.max())
     lb = np.logspace(np.log10(lo), np.log10(hi), 36)
     axB.hist(vr, bins=lb, density=True, histtype="step", color=INK, lw=1.5,
-             label=r"realised variance (by state)")
+             label=T(r"realised variance (by state)"))
     axB.hist(vm, bins=lb, density=True, histtype="stepfilled", color=ACCENT, alpha=0.45, lw=1.2,
-             edgecolor=ACCENT_DARK, label=r"model variance $a_{xx}(I,S)$")
+             edgecolor=ACCENT_DARK, label=T(r"model variance $a_{xx}(I,S)$"))
     axB.axvline(np.median(vr), color=INK, ls=":", lw=1)
     axB.axvline(np.median(vm), color=ACCENT_DARK, ls=":", lw=1)
     axB.set_xscale("log")
-    axB.set_xlabel(r"conditional variance of the one-step move  [bps$^2$]")
-    axB.set_ylabel(r"density")
-    axB.set_title(r"(b) Variance distribution along the realised path: model vs realised")
+    axB.set_xlabel(T(r"conditional variance of the one-step move  [bps$^2$]"))
+    axB.set_ylabel(T(r"density"))
+    axB.set_title("(b) " + T(r"Variance distribution along the realised path: model vs realised"))
     axB.legend(loc="upper right", fontsize=8); despine(axB)
-    figc.suptitle(rf"Model vs realised on held-out data ({sym}): the distribution of one-step returns "
-                  rf"and of the conditional variance", y=1.01)
+    figc.suptitle(T(r"Model vs realised on held-out data (") + f"{sym}"
+                  + T(r"): the distribution of one-step returns and of the conditional variance"), y=1.01)
     finish(figc, OUTF / "fig_model_vs_realized.png")
     print("[band] wrote manuscript/en/ssrn/figures/fig_model_vs_realized.png")
 

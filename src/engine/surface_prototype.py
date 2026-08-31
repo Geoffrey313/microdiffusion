@@ -31,7 +31,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common.paths import load_config, CLEAN_DIR, DIAG_DIR
 from common.grid import N_I, M_S, cell_ids
-from common.plot_style import ACCENT, ACCENT_DARK, WARN, MUTED, INK, POS, finish, setup_mpl, despine
+from common.plot_style import ACCENT, ACCENT_DARK, WARN, MUTED, INK, POS, finish, setup_mpl, despine, T
 
 TRAIN_FRAC = 0.60
 MIN_CELL = 50
@@ -145,13 +145,13 @@ def main():
     # A: standardised-residual density (log y) vs N(0,1)
     a = ax[0, 0]; grid = np.linspace(-8, 8, 200)
     a.hist(z[np.abs(z) < 8], bins=grid, density=True, histtype="step", color=ACCENT_DARK, lw=1.4,
-           label=r"state-dependent $z$")
+           label=T(r"state-dependent $z$"))
     a.hist(z0[np.abs(z0) < 8], bins=grid, density=True, histtype="step", color=MUTED, lw=1.1,
-           label=r"state-independent")
+           label=T(r"state-independent"))
     a.plot(grid, np.exp(-grid**2/2)/np.sqrt(2*np.pi), color=WARN, ls="--", lw=1.3, label=r"$N(0,1)$")
     a.set_yscale("log"); a.set_ylim(1e-5, 1)
-    a.set_xlabel(r"standardised increment $z=(\Delta x-b_x)/\sqrt{a_{xx}}$")
-    a.set_ylabel(r"density (log)"); a.set_title(r"Conditioning fixes the scale, not the tails")
+    a.set_xlabel(T(r"standardised increment $z=(\Delta x-b_x)/\sqrt{a_{xx}}$"))
+    a.set_ylabel(T(r"density (log)")); a.set_title(T(r"Conditioning fixes the scale, not the tails"))
     a.legend(loc="lower center"); despine(a)
 
     # B: variance calibration (train a_xx vs test mean square), per cell
@@ -159,19 +159,19 @@ def main():
     b.scatter(cal["train_axx"], cal["test_msq"], s=8, c=ACCENT, alpha=0.5, edgecolors="none")
     lim = [min(cal["train_axx"].min(), cal["test_msq"].min()), max(cal["train_axx"].max(), cal["test_msq"].max())]
     b.plot(lim, lim, color=INK, lw=1, ls="--"); b.set_xscale("log"); b.set_yscale("log")
-    b.set_xlabel(r"train $a_{xx}(c)$"); b.set_ylabel(r"test $\mathbb{E}[(\Delta x)^2\mid c]$")
-    b.set_title(rf"Variance calibration (Spearman {summ['var_calib_spearman']:.2f})"); despine(b)
+    b.set_xlabel(T(r"train $a_{xx}(c)$")); b.set_ylabel(T(r"test $\mathbb{E}[(\Delta x)^2\mid c]$"))
+    b.set_title(T(r"Variance calibration (Spearman") + f" {summ['var_calib_spearman']:.2f})"); despine(b)
 
     # C: per-cell std(z) vs cell volatility - homoskedasticity
     c_ = ax[1, 0]
     order = np.argsort(cellvol)
     c_.scatter(np.array(cellvol)[order]*1e4, np.array(cellstd_ind)[order], s=8, c=MUTED, alpha=0.6,
-               edgecolors="none", label=r"state-independent")
+               edgecolors="none", label=T(r"state-independent"))
     c_.scatter(np.array(cellvol)[order]*1e4, np.array(cellstd_dep)[order], s=8, c=ACCENT_DARK, alpha=0.7,
-               edgecolors="none", label=r"state-dependent")
+               edgecolors="none", label=T(r"state-dependent"))
     c_.axhline(1, color=WARN, ls="--", lw=1.2)
-    c_.set_xscale("log"); c_.set_xlabel(r"cell volatility $\sqrt{a_{xx}}$ (bps)")
-    c_.set_ylabel(r"$\mathrm{std}(z)$ within cell"); c_.set_title(r"State model removes heteroskedasticity")
+    c_.set_xscale("log"); c_.set_xlabel(T(r"cell volatility $\sqrt{a_{xx}}$ (bps)"))
+    c_.set_ylabel(T(r"$\mathrm{std}(z)$ within cell")); c_.set_title(T(r"State model removes heteroskedasticity"))
     c_.legend(loc="best"); despine(c_)
 
     # D: tail reproduction - P(|dx|/sigma_local > k), data vs model
@@ -180,14 +180,14 @@ def main():
     zr = np.abs(dxr / sigloc); zs = np.abs((dxs - 0) / sigloc)   # standardise both by local sigma
     pr = [np.mean(zr > k) for k in ks]; ps = [np.mean(zs > k) for k in ks]
     pn = [2*(1-0.5*(1+math.erf(k/np.sqrt(2)))) for k in ks]
-    d.plot(ks, pr, "-o", color=ACCENT_DARK, ms=4, label=r"data")
-    d.plot(ks, ps, "-s", color=POS, ms=4, label=r"Gaussian SDE (sim)")
+    d.plot(ks, pr, "-o", color=ACCENT_DARK, ms=4, label=T(r"data"))
+    d.plot(ks, ps, "-s", color=POS, ms=4, label=T(r"Gaussian SDE (sim)"))
     d.plot(ks, pn, "--", color=WARN, lw=1.2, label=r"$N(0,1)$")
-    d.set_yscale("log"); d.set_xlabel(r"threshold $k$ (local std units)")
-    d.set_ylabel(r"$P(|\Delta x|/\sigma_{\mathrm{loc}}>k)$"); d.set_title(r"Tails: data heavier than the model")
+    d.set_yscale("log"); d.set_xlabel(T(r"threshold $k$ (local std units)"))
+    d.set_ylabel(r"$P(|\Delta x|/\sigma_{\mathrm{loc}}>k)$"); d.set_title(T(r"Tails: data heavier than the model"))
     d.legend(loc="best"); despine(d)
 
-    fig.suptitle(r"Conditional state-dependent diffusion model vs.\ QSE data (held-out)", y=1.0)
+    fig.suptitle(T(r"Conditional state-dependent diffusion model vs.\ QSE data (held-out)"), y=1.0)
     finish(fig, DIAG_DIR / "figures" / "sde_prototype.png")
     print("\n[sde] wrote figures/sde_prototype.png and tables/sde_prototype_summary.csv")
 

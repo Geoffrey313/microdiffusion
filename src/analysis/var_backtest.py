@@ -33,7 +33,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common.paths import load_config, CLEAN_DIR, FIG_DIR
 from common.grid import N_I, M_S, cell_ids
-from common.plot_style import finish, setup_mpl, despine, INK, ACCENT, ACCENT_DARK, WARN, MUTED
+from common.plot_style import finish, setup_mpl, despine, INK, ACCENT, ACCENT_DARK, WARN, MUTED, T
 
 OUTF = FIG_DIR
 OUTF.mkdir(parents=True, exist_ok=True)
@@ -292,12 +292,12 @@ def main():
         if key in parts:
             parts[key].set_color(INK); parts[key].set_linewidth(1.0)
 
-    ax0.axhline(ALPHAS[0], color=INK,  ls="--", lw=1.0, label=r"nominal $\alpha{=}0.01$")
-    ax0.axhline(ALPHAS[1], color=MUTED, ls=":",  lw=1.0, label=r"nominal $\alpha{=}0.05$")
+    ax0.axhline(ALPHAS[0], color=INK,  ls="--", lw=1.0, label=T(r"nominal $\alpha{=}0.01$"))
+    ax0.axhline(ALPHAS[1], color=MUTED, ls=":",  lw=1.0, label=T(r"nominal $\alpha{=}0.05$"))
     ax0.set_xticks(positions)
     ax0.set_xticklabels(labels, fontsize=7)
-    ax0.set_ylabel(r"empirical violation rate $\hat{\pi}$")
-    ax0.set_title(r"(a) Violation rates: GH vs Gaussian by $\alpha$")
+    ax0.set_ylabel(T(r"empirical violation rate $\hat{\pi}$"))
+    ax0.set_title("(a) " + T(r"Violation rates: GH vs Gaussian by $\alpha$"))
     ax0.legend(fontsize=7); despine(ax0)
 
     # Panel (b): scatter LR_uc p-value GH vs Gaussian, per instrument, both alpha levels
@@ -315,14 +315,14 @@ def main():
     ax1.plot([lo, hi], [lo, hi], color=MUTED, lw=0.8, ls="--")
     ax1.axhline(0.05, color=INK,  lw=0.8, ls=":", alpha=0.6)
     ax1.axvline(0.05, color=WARN, lw=0.8, ls=":", alpha=0.6)
-    ax1.set_xlabel(r"Kupiec $p$-value: Gaussian VaR")
-    ax1.set_ylabel(r"Kupiec $p$-value: GH VaR")
-    ax1.set_title(r"(b) Kupiec LR$_{\mathrm{uc}}$ $p$-values, GH vs Gaussian")
+    ax1.set_xlabel(T(r"Kupiec $p$-value: Gaussian VaR"))
+    ax1.set_ylabel(T(r"Kupiec $p$-value: GH VaR"))
+    ax1.set_title("(b) " + T(r"Kupiec LR$_{\mathrm{uc}}$ $p$-values, GH vs Gaussian"))
     ax1.legend(fontsize=7); despine(ax1)
 
     fig.suptitle(
-        r"Intraday VaR backtest: $|\Delta x_n - b_x(I_n,S_n)| > \sqrt{a_{xx}(I_n,S_n)}\,q^{\,}_{1-\alpha/2}$"
-        r" - GH vs Gaussian innovation, Kupiec/Christoffersen, QSE held-out sessions",
+        T(r"Intraday VaR backtest: $|\Delta x_n - b_x(I_n,S_n)| > \sqrt{a_{xx}(I_n,S_n)}\,q^{\,}_{1-\alpha/2}$"
+          r" - GH vs Gaussian innovation, Kupiec/Christoffersen, QSE held-out sessions"),
         y=1.02
     )
     finish(fig, OUTF / "fig_var_backtest.png")

@@ -29,7 +29,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common.paths import load_config, CLEAN_DIR, DIAG_DIR
 from common.grid import N_I, M_S, cell_ids
-from common.plot_style import ACCENT, ACCENT_DARK, WARN, MUTED, INK, finish, setup_mpl, despine
+from common.plot_style import ACCENT, ACCENT_DARK, WARN, MUTED, INK, finish, setup_mpl, despine, T
 
 TRAIN_FRAC = 0.60
 MIN_CELL = 50
@@ -169,11 +169,11 @@ def main():
     # --- A: recover sqrt(a_xx) by dividing out the GH shape ---
     axA.scatter(rms_scale * 1e4, gh_scale * 1e4, s=9, c=ACCENT, alpha=0.5, edgecolors="none")
     lim = [min(rms_scale.min(), gh_scale.min()) * 1e4, max(rms_scale.max(), gh_scale.max()) * 1e4]
-    axA.plot(lim, lim, color=INK, ls="--", lw=1.2, label=r"$y=x$: the two measurements agree")
+    axA.plot(lim, lim, color=INK, ls="--", lw=1.2, label=T(r"$y=x$: the two measurements agree"))
     axA.set_xscale("log"); axA.set_yscale("log")
-    axA.set_xlabel(r"ordinary move size $\sqrt{a_{xx}}=\sqrt{\mathbb{E}[(\Delta x-b)^2]}$  (bps)")
-    axA.set_ylabel(r"$(\Delta x-b)\,\div\,\mathrm{GH\ shape}\,=\,$ recovered $\sqrt{a_{xx}}$  (bps)")
-    axA.set_title(rf"(A) Divide out the GH shape $\eta$ $\Rightarrow$ recover $\sqrt{{a_{{xx}}}}$ (Spearman {sp:.2f})")
+    axA.set_xlabel(T(r"ordinary move size $\sqrt{a_{xx}}=\sqrt{\mathbb{E}[(\Delta x-b)^2]}$  (bps)"))
+    axA.set_ylabel(T(r"$(\Delta x-b)\,\div\,\mathrm{GH\ shape}\,=\,$ recovered $\sqrt{a_{xx}}$  (bps)"))
+    axA.set_title("(A) " + T(r"Divide out the GH shape $\eta$ $\Rightarrow$ recover $\sqrt{{a_{{xx}}}}$ (Spearman") + f" {sp:.2f})")
     axA.text(0.04, 0.83,
              r"$\Delta x - b = \sqrt{a_{xx}(I,S)}\;\eta,\ \ \eta\sim\mathrm{GH}$" "\n"
              r"$\Rightarrow\ \dfrac{\Delta x - b}{\eta}=\sqrt{a_{xx}(I,S)}$",
@@ -184,22 +184,22 @@ def main():
     # --- B: dividing out sqrt(G) alone leaves sqrt(a_xx) Z -> NOT Gaussian ---
     grid = np.linspace(-8, 8, 220); bins = np.linspace(-8, 8, 150)
     axB.hist(g_only[np.abs(g_only) < 8], bins=bins, density=True, histtype="step", color=ACCENT_DARK, lw=1.6,
-             label=r"$(\Delta x-b)/\sqrt{G}=\sqrt{a_{xx}}\,Z$  (only $\sqrt{G}$ removed)")
+             label=T(r"$(\Delta x-b)/\sqrt{G}=\sqrt{a_{xx}}\,Z$  (only $\sqrt{G}$ removed)"))
     axB.hist(both[np.abs(both) < 8], bins=bins, density=True, histtype="step", color=MUTED, lw=1.2,
-             label=r"$(\Delta x-b)/\sqrt{a_{xx}G}=Z$  (both removed)")
-    axB.plot(grid, stats.norm.pdf(grid), color=WARN, ls="--", lw=1.3, label=r"$N(0,1)$ target")
+             label=T(r"$(\Delta x-b)/\sqrt{a_{xx}G}=Z$  (both removed)"))
+    axB.plot(grid, stats.norm.pdf(grid), color=WARN, ls="--", lw=1.3, label=T(r"$N(0,1)$ target"))
     axB.set_yscale("log"); axB.set_ylim(1e-5, 1)
-    axB.set_xlabel(r"standardised value")
-    axB.set_ylabel(r"density (log scale)")
-    axB.set_title(r"(B) $\sqrt{G}$ alone can't whiten: the state scale $a_{xx}$ is still needed")
-    axB.text(0.5, 0.04, r"removing only $\sqrt{G}$ leaves $\sqrt{a_{xx}}\,Z$ - a scale-mixture over states $\Rightarrow$ fat tails,"
-             "\n" r"not $N(0,1)$.  ($G$ is latent on real data; here $G$ is simulated, $\sqrt{a_{xx}}$ from real states.)",
+    axB.set_xlabel(T(r"standardised value"))
+    axB.set_ylabel(T(r"density (log scale)"))
+    axB.set_title("(B) " + T(r"$\sqrt{G}$ alone can't whiten: the state scale $a_{xx}$ is still needed"))
+    axB.text(0.5, 0.04, T(r"removing only $\sqrt{G}$ leaves $\sqrt{a_{xx}}\,Z$ - a scale-mixture over states $\Rightarrow$ fat tails,"
+             "\n" r"not $N(0,1)$.  ($G$ is latent on real data; here $G$ is simulated, $\sqrt{a_{xx}}$ from real states.)"),
              transform=axB.transAxes, ha="center", va="bottom", fontsize=6.8,
              bbox=dict(boxstyle="round,pad=0.4", fc="white", ec=INK, lw=0.6, alpha=0.85))
     axB.legend(loc="upper right", fontsize=7); despine(axB)
 
-    fig.suptitle(r"Scale and shape are both needed: $a_{xx}$ carries the state-dependence, $\sqrt{G}$ the burst "
-                 r"--- neither alone whitens the move", y=1.01)
+    fig.suptitle(T(r"Scale and shape are both needed: $a_{xx}$ carries the state-dependence, $\sqrt{G}$ the burst "
+                   r"--- neither alone whitens the move"), y=1.01)
     finish(fig, DIAG_DIR / "figures" / "sde_scale_recovery.png")
     print("\n[scale] wrote figures/sde_scale_recovery.png and tables/sde_scale_recovery_summary.csv")
 

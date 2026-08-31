@@ -40,7 +40,7 @@ from scipy import stats
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common.paths import FIG_DIR, load_config
 from common.plot_style import (ACCENT, ACCENT_DARK, ACCENT_LIGHT, WARN, MUTED, INK,
-                               POS, finish, setup_mpl, despine)
+                               POS, finish, setup_mpl, despine, T)
 from data.crypto_panel import available, build_states, load_clean
 from analysis.crypto_transfer import W, WINSOR, MIN_CELL
 
@@ -190,8 +190,8 @@ def figure_surface(states, n_I, m_S, plt):
     im = a.imshow(np.log10(surf), aspect="auto", origin="lower", cmap="viridis")
     a.set_xticks(range(m_S)); a.set_xticklabels(s_labels)
     a.set_yticks(range(n_I)); a.set_yticklabels(i_labels)
-    a.set_ylabel(r"best-level imbalance $I$"); a.set_xlabel(r"relative spread $S$")
-    a.set_title(r"(a) Diffusion surface $\log_{10}\,a_{xx}/\mathrm{median}$ (pooled)")
+    a.set_ylabel(T(r"best-level imbalance $I$")); a.set_xlabel(T(r"relative spread $S$"))
+    a.set_title("(a) " + T(r"Diffusion surface $\log_{10}\,a_{xx}/\mathrm{median}$ (pooled)"))
     a.grid(False)
     fig.colorbar(im, ax=a, fraction=0.046, pad=0.04)
     for ib in range(n_I):
@@ -206,13 +206,13 @@ def figure_surface(states, n_I, m_S, plt):
     lo = float(np.nanmin(pts[["a_train_n", "a_test_n"]].to_numpy()))
     hi = float(np.nanmax(pts[["a_train_n", "a_test_n"]].to_numpy()))
     b.plot([lo, hi], [lo, hi], "-", color=INK, lw=1.0)
-    b.set_xlabel(r"training cell diffusion $a_{xx}^{\mathrm{train}}$ (fold-normalised)")
-    b.set_ylabel(r"held-out cell diffusion $a_{xx}^{\mathrm{test}}$ (fold-normalised)")
-    b.set_title(r"(b) Walk-forward transfer per cell (fold-averaged $\rho=%.2f$)" % rho)
+    b.set_xlabel(T(r"training cell diffusion $a_{xx}^{\mathrm{train}}$ (fold-normalised)"))
+    b.set_ylabel(T(r"held-out cell diffusion $a_{xx}^{\mathrm{test}}$ (fold-normalised)"))
+    b.set_title("(b) " + T(r"Walk-forward transfer per cell (fold-averaged $\rho=%.2f$)") % rho)
     b.legend(loc="upper left", ncol=2)
     despine(b)
 
-    fig.suptitle(r"The diffusion surface on the cryptocurrency panel and its walk-forward transfer", y=1.0)
+    fig.suptitle(T(r"The diffusion surface on the cryptocurrency panel and its walk-forward transfer"), y=1.0)
     finish(fig, FIG_DIR / "fig_crypto_axx.png")
     return rho, len(pts)
 
@@ -225,11 +225,11 @@ def figure_heavytail(states, n_I, m_S, plt):
     z = z[np.isfinite(z)]
     sd = float(z.std())
 
-    gauss = {"name": r"best-fit Gaussian", "ls": "--", "c": WARN,
+    gauss = {"name": T(r"best-fit Gaussian"), "ls": "--", "c": WARN,
              "pdf": lambda x: stats.norm.pdf(x / sd) / sd,
              "sf": lambda k: 2.0 * stats.norm.sf(k / sd)}
     nu, _, ts = stats.t.fit(z, floc=0.0)
-    tlaw = {"name": r"Student-$t$ (ML)", "ls": "-", "c": ACCENT_DARK,
+    tlaw = {"name": T(r"Student-$t$ (ML)"), "ls": "-", "c": ACCENT_DARK,
             "pdf": lambda x: stats.t.pdf(x / ts, nu) / ts,
             "sf": lambda k: 2.0 * stats.t.sf(k / ts, nu)}
     laws = [gauss, tlaw]
@@ -237,7 +237,7 @@ def figure_heavytail(states, n_I, m_S, plt):
         zz = z if len(z) <= 200_000 else RNG.choice(z, 200_000, replace=False)
         p, al, be, loc, gs = stats.genhyperbolic.fit(zz, fb=0.0, floc=0.0)
         fr = stats.genhyperbolic(p, al, 0.0, 0.0, gs)
-        laws.append({"name": r"Gen.\ Hyperbolic (ML)", "ls": "-", "c": POS,
+        laws.append({"name": T(r"Gen.\ Hyperbolic (ML)"), "ls": "-", "c": POS,
                      "pdf": lambda x: fr.pdf(x), "sf": lambda k: fr.sf(k) + fr.cdf(-k)})
     except Exception as e:  # noqa: BLE001
         print("[crypto-fig] GH fit failed:", e)
@@ -249,28 +249,28 @@ def figure_heavytail(states, n_I, m_S, plt):
     a = ax[0]; lo, hi = -8 * sd, 8 * sd
     binp = np.linspace(lo, hi, 160); gridp = np.linspace(lo, hi, 400)
     a.hist(z[(z > lo) & (z < hi)], bins=binp, density=True, histtype="step",
-           color=MUTED, lw=1.5, label=r"data $z$")
+           color=MUTED, lw=1.5, label=T(r"data $z$"))
     for L in laws:
         a.plot(gridp, L["pdf"](gridp), color=L["c"], ls=L["ls"], lw=1.4, label=L["name"])
     a.set_yscale("log"); a.set_ylim(1e-5, 2)
-    a.set_xlabel(r"standardised increment $z=(\Delta x-b_x)/\sqrt{a_{xx}}$")
-    a.set_ylabel(r"density (log scale)")
-    a.set_title(r"(a) Shape of the kick: Gaussian vs heavy-tailed")
+    a.set_xlabel(T(r"standardised increment $z=(\Delta x-b_x)/\sqrt{a_{xx}}$"))
+    a.set_ylabel(T(r"density (log scale)"))
+    a.set_title("(a) " + T(r"Shape of the kick: Gaussian vs heavy-tailed"))
     a.legend(loc="lower center", ncol=2); despine(a); a.grid(False)
 
     d = ax[1]
-    d.plot(ks, emp, "-o", color=MUTED, ms=4, lw=1.6, label=r"data")
+    d.plot(ks, emp, "-o", color=MUTED, ms=4, lw=1.6, label=T(r"data"))
     for L in laws:
         d.plot(ks, [L["sf"](k) for k in ks], ls=L["ls"], color=L["c"], lw=1.4,
                marker="s", ms=3, label=L["name"])
     d.set_yscale("log"); d.set_ylim(1e-7, 1)
-    d.set_xlabel(r"threshold $k$ (in units of $\sqrt{a_{xx}}$)")
+    d.set_xlabel(T(r"threshold $k$ (in units of $\sqrt{a_{xx}}$)"))
     d.set_ylabel(r"$P(|\,z\,| > k)$")
-    d.set_title(r"(b) Tail exceedance on the held-out blocks")
+    d.set_title("(b) " + T(r"Tail exceedance on the held-out blocks"))
     d.legend(loc="upper right"); despine(d); d.grid(False)
 
-    fig.suptitle(r"Heavy-tailed innovation on the cryptocurrency panel: standardised held-out "
-                 r"increments vs fitted laws", y=1.02)
+    fig.suptitle(T("Heavy-tailed innovation on the cryptocurrency panel: standardised held-out "
+                   "increments vs fitted laws"), y=1.02)
     finish(fig, FIG_DIR / "fig_crypto_heavytail.png")
     return len(z), float(nu)
 
