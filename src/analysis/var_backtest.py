@@ -29,6 +29,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
+import os
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common.paths import load_config, CLEAN_DIR, FIG_DIR
@@ -37,6 +38,7 @@ from common.plot_style import finish, setup_mpl, despine, INK, ACCENT, ACCENT_DA
 
 OUTF = FIG_DIR
 OUTF.mkdir(parents=True, exist_ok=True)
+VENUE = os.environ.get("MICRODIFFUSION_VENUE", "QSE")  # relabelled by reproduce.py --us
 
 TRAIN_FRAC = 0.60
 MIN_CELL = 50
@@ -321,8 +323,8 @@ def main():
     ax1.legend(fontsize=7); despine(ax1)
 
     fig.suptitle(
-        T(r"Intraday VaR backtest: $|\Delta x_n - b_x(I_n,S_n)| > \sqrt{a_{xx}(I_n,S_n)}\,q^{\,}_{1-\alpha/2}$"
-          r" - GH vs Gaussian innovation, Kupiec/Christoffersen, QSE held-out sessions"),
+        T((r"Intraday VaR backtest: $|\Delta x_n - b_x(I_n,S_n)| > \sqrt{a_{xx}(I_n,S_n)}\,q^{\,}_{1-\alpha/2}$"
+           r" - GH vs Gaussian innovation, Kupiec/Christoffersen, %s held-out sessions") % VENUE),
         y=1.02
     )
     finish(fig, OUTF / "fig_var_backtest.png")

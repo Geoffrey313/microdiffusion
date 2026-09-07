@@ -71,6 +71,8 @@ GATED_FIGURES = ["figures/descriptive_stats.py"]
 ROBUSTNESS = [
     "analysis/surface_identifiability.py",
     "analysis/var_backtest.py",
+    "analysis/es_evt_scoring.py",
+    "analysis/midas_regular_clock.py",
     "analysis/regime_transfer.py",
     "analysis/thinname_exclusion.py",
     "analysis/tick_control.py",
@@ -149,7 +151,8 @@ def us_battery() -> None:
            "MICRODIFFUSION_DATA_DIR": str(US_ROOT),
            "MICRODIFFUSION_RESULTS_DIR": str(US_RESULTS),
            "MICRODIFFUSION_FIG_DIR": str(fig),
-           "MICRODIFFUSION_SECTIONS_DIR": str(sections)}
+           "MICRODIFFUSION_SECTIONS_DIR": str(sections),
+           "MICRODIFFUSION_VENUE": "US large-cap"}
 
     for m in DATA:
         if run(m, env=env, abort=False) != 0:
